@@ -1,0 +1,9 @@
+D:\workdir\VSWorkspace\AxisBox\AxisBox\bin\Debug\AxisBox.dll
+D:\workdir\VSWorkspace\AxisBox\AxisBox\bin\Debug\AxisBox.pdb
+D:\workdir\VSWorkspace\AxisBox\AxisBox\obj\Debug\AxisBox.csprojResolveAssemblyReference.cache
+D:\workdir\VSWorkspace\AxisBox\AxisBox\obj\Debug\AxisBox.csproj.GenerateResource.Cache
+D:\workdir\VSWorkspace\AxisBox\AxisBox\obj\Debug\AxisBox.dll
+D:\workdir\VSWorkspace\AxisBox\AxisBox\obj\Debug\AxisBox.pdb
+D:\workdir\VSWorkspace\AxisBox\AxisBox\bin\Debug\Matrix.dll
+D:\workdir\VSWorkspace\AxisBox\AxisBox\bin\Debug\Matrix.pdb
+D:\workdir\VSWorkspace\AxisBox\AxisBox\obj\Debug\AxisBox.AxisBox.resources

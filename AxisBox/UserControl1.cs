@@ -375,6 +375,30 @@ namespace AxisBox
                 }
             }
         }
+        public Color CurveColor
+        {
+            get { return lineColor; }
+            set
+            {
+                if (isPlotted)
+                {
+                    lineColor = value;
+                    Invalidate();
+                }
+            }
+        }
+        public System.Drawing.Drawing2D.DashStyle CurveDashStyle
+        {
+            get { return lineDashStyle; }
+            set
+            {
+                if (isPlotted)
+                {
+                    lineDashStyle = value;
+                    Invalidate();
+                }
+            }
+        }
         #endregion
 
         public AxisBox()
@@ -563,6 +587,7 @@ namespace AxisBox
                 if (phisicsX.Count != 0)
                 {
                     Pen funcPen = new Pen(this.lineColor, 1);
+                    funcPen.DashStyle = lineDashStyle;
                     for (int i = 0; i < phisicsX.Count; i++)
                     {
                         for (int j = 0; j < phisicsX.ElementAt(i).Columns - 1; j++)
@@ -964,7 +989,7 @@ namespace AxisBox
 
         private void AxisBox_SizeChanged(object sender, EventArgs e)
         {
-            this.refreshParameter();
+            refreshParameter();
         }
     }
 }

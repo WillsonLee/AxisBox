@@ -7,3 +7,5 @@ D:\workdir\VSWorkspace\AxisBox\AxisBox\obj\Debug\AxisBox.pdb
 D:\workdir\VSWorkspace\AxisBox\AxisBox\bin\Debug\Matrix.dll
 D:\workdir\VSWorkspace\AxisBox\AxisBox\bin\Debug\Matrix.pdb
 D:\workdir\VSWorkspace\AxisBox\AxisBox\obj\Debug\AxisBox.AxisBox.resources
+D:\workdir\VSWorkspace\AxisBox\AxisBox\bin\Debug\Matrix.xml
+D:\workdir\VSWorkspace\AxisBox\AxisBox\bin\Debug\AxisBox.XML

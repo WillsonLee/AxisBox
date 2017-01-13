@@ -11,6 +11,10 @@ using MatrixTool;
 
 namespace AxisBox
 {
+    /// <summary>
+    /// 函数画图板控件
+    /// </summary>
+    [ToolboxBitmap(typeof(AxisBox),"UserDefinedControl.bmp")]
     public partial class AxisBox: UserControl
     {
         #region 私有字段
@@ -69,8 +73,12 @@ namespace AxisBox
         private double originX;
         private double originY;
         #endregion
+
         #region 访问器
         //在调用Plot函数前,任何属性都是不可改的//即没有画函数图前改属性没有意义
+        /// <summary>
+        /// x轴是否显示
+        /// </summary>
         public bool XAxisOn
         {
             get { return xAxis; }
@@ -83,6 +91,9 @@ namespace AxisBox
                 }
             }
         }
+        /// <summary>
+        /// y轴是否显示
+        /// </summary>
         public bool YAxisOn
         {
             get { return yAxis; }
@@ -95,6 +106,9 @@ namespace AxisBox
                 }
             }
         }
+        /// <summary>
+        /// x轴是否取对数坐标
+        /// </summary>
         public bool XLog
         {
             get { return xLog; }
@@ -128,6 +142,9 @@ namespace AxisBox
                 }
             }
         }
+        /// <summary>
+        /// y轴是否取对数坐标
+        /// </summary>
         public bool YLog
         {
             get { return yLog; }
@@ -161,6 +178,9 @@ namespace AxisBox
                 }
             }
         }
+        /// <summary>
+        /// 网格是否打开
+        /// </summary>
         public bool GridOn
         {
             get { return gridOn; }
@@ -173,6 +193,9 @@ namespace AxisBox
                 }
             }
         }
+        /// <summary>
+        /// 是否允许多图形绘制
+        /// </summary>
         public bool HoldOn
         {
             get { return holdOn; }
@@ -185,6 +208,9 @@ namespace AxisBox
                 }
             }
         }
+        /// <summary>
+        /// 是否显示标题
+        /// </summary>
         public bool TitleOn
         {
             get { return titleOn; }
@@ -197,6 +223,9 @@ namespace AxisBox
                 }
             }
         }
+        /// <summary>
+        /// 是否显示x轴标签
+        /// </summary>
         public bool XLabelOn
         {
             get { return xLabelOn; }
@@ -209,6 +238,9 @@ namespace AxisBox
                 }
             }
         }
+        /// <summary>
+        /// 是否显示y轴标签
+        /// </summary>
         public bool YLabelOn
         {
             get { return yLabelOn; }
@@ -221,6 +253,9 @@ namespace AxisBox
                 }
             }
         }
+        /// <summary>
+        /// 是否显示x轴刻度
+        /// </summary>
         public bool XTickOn
         {
             get { return xTickOn; }
@@ -233,6 +268,9 @@ namespace AxisBox
                 }
             }
         }
+        /// <summary>
+        /// 是否显示y轴刻度
+        /// </summary>
         public bool YTickOn
         {
             get { return yTickOn; }
@@ -245,6 +283,9 @@ namespace AxisBox
                 }
             }
         }
+        /// <summary>
+        /// 是否显示x刻度读数
+        /// </summary>
         public bool XTickLabelOn
         {
             get { return xTickLabelOn; }
@@ -257,6 +298,9 @@ namespace AxisBox
                 }
             }
         }
+        /// <summary>
+        /// 是否显示y轴刻度读数
+        /// </summary>
         public bool YTickLabelOn
         {
             get { return yTickLabelOn; }
@@ -269,6 +313,9 @@ namespace AxisBox
                 }
             }
         }
+        /// <summary>
+        /// 是否打开坐标点捕捉模式
+        /// </summary>
         public bool CaptureMode
         {
             get { return captureMode; }
@@ -281,6 +328,9 @@ namespace AxisBox
                 }
             }
         }
+        /// <summary>
+        /// 是否启用黑色主题模式
+        /// </summary>
         public bool DarkTheme
         {
             get { return darkTheme; }
@@ -305,6 +355,9 @@ namespace AxisBox
                 }
             }
         }
+        /// <summary>
+        /// x轴标签内容
+        /// </summary>
         public string XLabel
         {
             get { return xLabel; }
@@ -317,6 +370,9 @@ namespace AxisBox
                 }
             }
         }
+        /// <summary>
+        /// y轴标签内容
+        /// </summary>
         public string YLabel
         {
             get { return yLabel; }
@@ -329,6 +385,9 @@ namespace AxisBox
                 }
             }
         }
+        /// <summary>
+        /// 标题内容
+        /// </summary>
         public string PlotTitle
         {
             get { return plotTitle; }
@@ -341,6 +400,9 @@ namespace AxisBox
                 }
             }
         }
+        /// <summary>
+        /// x轴标签文本字体大小
+        /// </summary>
         public int XLabelSize
         {
             get { return xLabelSize; }
@@ -353,6 +415,9 @@ namespace AxisBox
                 }
             }
         }
+        /// <summary>
+        /// y标签文本字体大小
+        /// </summary>
         public int YLabelSize
         {
             get { return yLabelSize; }
@@ -365,6 +430,9 @@ namespace AxisBox
                 }
             }
         }
+        /// <summary>
+        /// 标题文本字体大小
+        /// </summary>
         public int PlotTitleSize
         {
             get { return plotTitleSize; }
@@ -377,6 +445,9 @@ namespace AxisBox
                 }
             }
         }
+        /// <summary>
+        /// x轴分度值
+        /// </summary>
         public double XStep
         {
             get { return xStep; }
@@ -390,6 +461,9 @@ namespace AxisBox
                 }
             }
         }
+        /// <summary>
+        /// y轴分度值
+        /// </summary>
         public double YStep
         {
             get { return yStep; }
@@ -403,6 +477,9 @@ namespace AxisBox
                 }
             }
         }
+        /// <summary>
+        /// x最小值
+        /// </summary>
         public double XMin
         {
             get { return xMin; }
@@ -416,6 +493,9 @@ namespace AxisBox
                 }
             }
         }
+        /// <summary>
+        /// x最大值
+        /// </summary>
         public double XMax
         {
             get { return xMax; }
@@ -429,6 +509,9 @@ namespace AxisBox
                 }
             }
         }
+        /// <summary>
+        /// y最小值
+        /// </summary>
         public double YMin
         {
             get { return yMin; }
@@ -442,6 +525,9 @@ namespace AxisBox
                 }
             }
         }
+        /// <summary>
+        /// y最大值
+        /// </summary>
         public double YMax
         {
             get { return yMax; }
@@ -455,6 +541,9 @@ namespace AxisBox
                 }
             }
         }
+        /// <summary>
+        /// 函数曲线颜色
+        /// </summary>
         public Color CurveColor
         {
             get { return lineColor; }
@@ -467,6 +556,54 @@ namespace AxisBox
                 }
             }
         }
+        /// <summary>
+        /// 边框颜色
+        /// </summary>
+        public Color BorderColor
+        {
+            get { return boardColor; }
+            set
+            {
+                if (isPlotted)
+                {
+                    boardColor = value;
+                    this.Invalidate();
+                }
+            }
+        }
+        /// <summary>
+        /// 背景色
+        /// </summary>
+        public Color BackgroundColor
+        {
+            get { return backgroundColor; }
+            set
+            {
+                if (isPlotted)
+                {
+                    backgroundColor = value;
+                    Invalidate();
+                }
+            }
+        }
+        /// <summary>
+        /// 坐标轴、文本标签和网格颜色
+        /// </summary>
+        public Color AxisAndLabelColor
+        {
+            get { return axisAndLabelColor; }
+            set
+            {
+                if (isPlotted)
+                {
+                    axisAndLabelColor = value;
+                    Invalidate();
+                }
+            }
+        }
+        /// <summary>
+        /// 函数曲线线型
+        /// </summary>
         public System.Drawing.Drawing2D.DashStyle CurveDashStyle
         {
             get { return lineDashStyle; }
@@ -481,6 +618,10 @@ namespace AxisBox
         }
         #endregion
 
+        #region 功能函数
+        /// <summary>
+        /// 构造器
+        /// </summary>
         public AxisBox()
         {
             InitializeComponent();
@@ -542,6 +683,356 @@ namespace AxisBox
             Matrix y = new Matrix(yArray);
             this.Plot(x, y);
         }
+        #endregion
+
+        #region 辅助函数
+        private Matrix ToPhysicsX(Matrix xCoordinate)
+        {
+            Matrix result = Matrix.Zeros(xCoordinate.Rows, xCoordinate.Columns);
+            for (int i = 0; i < result.Rows; i++)
+            {
+                for (int j = 0; j < result.Columns; j++)
+                {
+                    result[i, j] = this.ToPhysicsX(xCoordinate[i, j]);
+                }
+            }
+            return result;
+        }
+        private Matrix ToPhysicsY(Matrix yCoordinate)
+        {
+            Matrix result = Matrix.Zeros(yCoordinate.Rows, yCoordinate.Columns);
+            for (int i = 0; i < result.Rows; i++)
+            {
+                for (int j = 0; j < result.Columns; j++)
+                {
+                    result[i, j] = this.ToPhysicsY(yCoordinate[i, j]);
+                }
+            }
+            return result;
+        }
+        private double ToPhysicsX(double xCoordinate)
+        {
+            double result;
+            if (!xLog)
+            {
+                result = (xCoordinate - xMin) / (xMax - xMin) * plotArea.Width + marginWidth;
+            }
+            else
+            {
+                double logRange = Math.Log10(xMax) - Math.Log10(xMin);
+                double leftLength = Math.Log10(xCoordinate) - Math.Log10(xMin);
+                result = leftLength / logRange * plotArea.Width + marginWidth;
+            }
+            return result;
+        }
+        private double ToPhysicsY(double yCoordinate)
+        {
+            double result;
+            if (!yLog)
+            {
+                result = (yMax - yCoordinate) / (yMax - yMin) * plotArea.Height + marginHeight;
+            }
+            else
+            {
+                double logRange = Math.Log10(yMax) - Math.Log10(yMin);
+                double upHeight = Math.Log10(yMax) - Math.Log10(yCoordinate);
+                result = upHeight / logRange * plotArea.Height + marginHeight;
+            }
+            return result;
+        }
+        private double ToActualX(int xCoordinate)
+        {
+            double result;
+            if (!xLog)
+            {
+                result = (xCoordinate - marginWidth) / plotArea.Width * (xMax - xMin) + xMin;
+            }
+            else
+            {
+                double logRange = Math.Log10(xMax) - Math.Log10(xMin);
+                result = Math.Pow(10, (xCoordinate - marginWidth) / plotArea.Width * logRange + Math.Log10(xMin));
+            }
+            return result;
+        }
+        private double ToActualY(int yCoordinate)
+        {
+            double result;
+            if (!yLog)
+            {
+                result = (this.Height - yCoordinate - marginHeight) / plotArea.Height * (yMax - yMin) + yMin;
+            }
+            else
+            {
+                double logRange = Math.Log10(yMax) - Math.Log10(yMin);
+                result = Math.Pow(10, (this.Height - yCoordinate) / plotArea.Height * logRange + Math.Log10(yMin));
+            }
+            return result;
+        }
+        private int[] FindIndex(Matrix x, double y)
+        {
+            //返回两个表示y在x中的下标范围的index
+            int left = 0;
+            int right = x.Columns - 1;
+            while (right > (left + 1))
+            {
+                if (x[0, left] == y)
+                    return new int[2] { left, left };
+                if (x[0, right] == y)
+                    return new int[2] { right, right };
+                int middle = (int)((left + right) / 2);
+                if ((x[0, left] - y) * (x[0, middle] - y) < 0)
+                {
+                    right = middle;
+                }
+                else
+                {
+                    left = middle;
+                }
+            }
+            return new int[2] { left, right };
+        }
+        private void getReorderedVersion()//按照x从小到大排列,同时相应的改变y的排列
+        {
+            xValReorder.RemoveRange(0, xValReorder.Count);
+            yValReorder.RemoveRange(0, yValReorder.Count);
+            for (int i = 0; i < xVal.Count; i++)
+            {
+                xValReorder.Add(new Matrix(xVal.ElementAt(i)));
+                yValReorder.Add(new Matrix(yVal.ElementAt(i)));
+                for (int j = 1; j < xValReorder.ElementAt(i).Columns; j++)
+                {
+                    for (int k = 0; k < xValReorder.ElementAt(i).Columns - j; k++)
+                    {
+                        if (xValReorder.ElementAt(i)[0, k] > xValReorder.ElementAt(i)[0, k + 1])
+                        {
+                            xValReorder.ElementAt(i)[0, k] = xValReorder.ElementAt(i)[0, k + 1] +
+                                                                xValReorder.ElementAt(i)[0, k];
+                            xValReorder.ElementAt(i)[0, k + 1] = xValReorder.ElementAt(i)[0, k] -
+                                                                xValReorder.ElementAt(i)[0, k + 1];
+                            xValReorder.ElementAt(i)[0, k] = xValReorder.ElementAt(i)[0, k] -
+                                                                xValReorder.ElementAt(i)[0, k + 1];
+                            yValReorder.ElementAt(i)[0, k] = yValReorder.ElementAt(i)[0, k] +
+                                                                yValReorder.ElementAt(i)[0, k + 1];
+                            yValReorder.ElementAt(i)[0, k + 1] = yValReorder.ElementAt(i)[0, k] -
+                                                                    yValReorder.ElementAt(i)[0, k + 1];
+                            yValReorder.ElementAt(i)[0, k] = yValReorder.ElementAt(i)[0, k] -
+                                                                yValReorder.ElementAt(i)[0, k + 1];
+                        }
+                    }
+                }
+            }
+        }
+        //对数坐标时只要改变一下原点和步距再刷新下数据就可以
+        private void XToLog()
+        {
+            xMin = Matrix.MinOfRow(xVal.ElementAt(0))[0, 0];
+            xMax = Matrix.MaxOfRow(xVal.ElementAt(0))[0, 0];
+            if (xVal.Count != 1)
+            {
+                for (int i = 1; i < xVal.Count; i++)
+                {
+                    double min1 = Matrix.MinOfRow(xVal.ElementAt(i))[0, 0];
+                    double max1 = Matrix.MaxOfRow(xVal.ElementAt(i))[0, 0];
+                    if (xMin > min1)
+                        xMin = min1;
+                    if (xMax < max1)
+                        xMax = max1;
+                }
+            }
+            double xMinReal = xMin;
+            double xMaxReal = xMax;
+            xMin = Math.Pow(10, Math.Floor(Math.Log10(xMin)));
+            xMax = Math.Pow(10, Math.Ceiling(Math.Log10(xMax)));
+            if (xMin == xMax)
+            {
+                xMin = Math.Pow(10, Math.Log10(xMin) - 1);
+                xMax = Math.Pow(10, Math.Log10(xMax) + 1);
+            }
+            double xRange = xMax - xMin;
+            xStep = Math.Pow(10, Math.Round(Math.Log10(xRange / 10), MidpointRounding.AwayFromZero));
+            while (xMin <= (xMinReal - xStep))
+            {
+                xMin = xMin + xStep;
+            }
+            while (xMax >= (xMaxReal + xStep))
+            {
+                xMax = xMax - xStep;
+            }
+            originX = xMin;
+        }
+        private void YToLog()
+        {
+            yMin = Matrix.MinOfRow(yVal.ElementAt(0))[0, 0];
+            yMax = Matrix.MaxOfRow(yVal.ElementAt(0))[0, 0];
+            if (yVal.Count != 1)
+            {
+                for (int i = 1; i < yVal.Count; i++)
+                {
+                    double min2 = Matrix.MinOfRow(yVal.ElementAt(i))[0, 0];
+                    double max2 = Matrix.MaxOfRow(yVal.ElementAt(i))[0, 0];
+                    if (yMin > min2)
+                        yMin = min2;
+                    if (yMax < max2)
+                        yMax = max2;
+                }
+            }
+            double yMinReal = yMin;
+            double yMaxReal = yMax;
+            yMin = Math.Pow(10, Math.Floor(Math.Log10(yMin)));
+            yMax = Math.Pow(10, Math.Ceiling(Math.Log10(yMax)));
+            if (yMin == yMax)//说明在画平行于x轴的直线
+            {
+                yMin = Math.Pow(10, Math.Log10(yMin) - 1);
+                yMax = Math.Pow(10, Math.Log10(yMax) + 1);
+            }
+            double yRange = yMax - yMin;
+            yStep = Math.Pow(10, Math.Round(Math.Log10(yRange / 10), MidpointRounding.AwayFromZero));
+            while (yMin <= (yMinReal - yStep))
+            {
+                yMin = yMin + yStep;
+            }
+            while (yMax >= (yMaxReal + yStep))
+            {
+                yMax = yMax - yStep;
+            }
+            originY = yMin;
+        }
+        private void XToLinear()
+        {
+            xMin = Matrix.MinOfRow(xVal.ElementAt(0))[0, 0];
+            xMax = Matrix.MaxOfRow(xVal.ElementAt(0))[0, 0];
+            if (xVal.Count != 1)
+            {
+                for (int i = 1; i < xVal.Count; i++)
+                {
+                    double min1 = Matrix.MinOfRow(xVal.ElementAt(i))[0, 0];
+                    double max1 = Matrix.MaxOfRow(xVal.ElementAt(i))[0, 0];
+                    if (xMin > min1)
+                        xMin = min1;
+                    if (xMax < max1)
+                        xMax = max1;
+                }
+            }
+            double xMinReal = xMin;
+            double xMaxReal = xMax;
+            if (xMin > 0)
+            {
+                xMin = Math.Pow(10, Math.Floor(Math.Log10(xMin)));
+            }
+            else if (xMin < 0)
+            {
+                xMin = -Math.Pow(10, Math.Ceiling(Math.Log10(-xMin)));
+            }
+            if (xMax > 0)
+            {
+                xMax = Math.Pow(10, Math.Ceiling(Math.Log10(xMax)));
+            }
+            else if (xMax < 0)
+            {
+                xMax = -Math.Pow(10, Math.Floor(Math.Log10(-xMax)));
+            }
+            if (xMin == xMax)//说明在画平行于y轴的直线
+            {
+                xMin = xMin - 3;
+                xMax = xMax + 3;
+            }
+            double xRange = xMax - xMin;
+            xStep = Math.Pow(10, Math.Round(Math.Log10(xRange / 10), MidpointRounding.AwayFromZero));
+            while (xMin <= (xMinReal - xStep))
+            {
+                xMin = xMin + xStep;
+            }
+            while (xMax >= (xMaxReal + xStep))
+            {
+                xMax = xMax - xStep;
+            }
+            originX = xMin;
+        }
+        private void YToLinear()
+        {
+            yMin = Matrix.MinOfRow(yVal.ElementAt(0))[0, 0];
+            yMax = Matrix.MaxOfRow(yVal.ElementAt(0))[0, 0];
+            if (yVal.Count != 1)
+            {
+                for (int i = 1; i < yVal.Count; i++)
+                {
+                    double min2 = Matrix.MinOfRow(yVal.ElementAt(i))[0, 0];
+                    double max2 = Matrix.MaxOfRow(yVal.ElementAt(i))[0, 0];
+                    if (yMin > min2)
+                        yMin = min2;
+                    if (yMax < max2)
+                        yMax = max2;
+                }
+            }
+            double yMinReal = yMin;
+            double yMaxReal = yMax;
+            if (yMin > 0)
+            {
+                yMin = Math.Pow(10, Math.Floor(Math.Log10(yMin)));
+            }
+            else if (yMin < 0)
+            {
+                yMin = -Math.Pow(10, Math.Ceiling(Math.Log10(-yMin)));
+            }
+            if (yMax > 0)
+            {
+                yMax = Math.Pow(10, Math.Ceiling(Math.Log10(yMax)));
+            }
+            else if (yMax < 0)
+            {
+                yMax = -Math.Pow(10, Math.Floor(Math.Log10(-yMax)));
+            }
+            if (yMin == yMax)//说明在画平行于x轴的直线
+            {
+                yMax = yMax + 3;
+                yMin = yMin - 3;
+            }
+            double yRange = yMax - yMin;
+            yStep = Math.Pow(10, Math.Round(Math.Log10(yRange / 10), MidpointRounding.AwayFromZero));
+            while ((yMax - yMin) / yStep <= 4)
+            {
+                yStep = (yMax - yMin) / 8;
+                yStep = Math.Pow(10, Math.Round(yStep));
+            }
+            while (yMin <= (yMinReal - yStep))
+            {
+                yMin = yMin + yStep;
+            }
+            while (yMax >= (yMaxReal + yStep))
+            {
+                yMax = yMax - yStep;
+            }
+            originY = yMin;
+        }
+        private void refreshParameter()
+        {
+            //以下作用为刷新曲线数据点、坐标原点所对应的物理坐标点
+            marginWidth = (int)(this.Width / 20);
+            marginHeight = (int)(this.Height / 20);
+            plotArea = new Rectangle(marginWidth, marginHeight,
+                                        this.Width - 2 * marginWidth, this.Height - 2 * marginHeight);
+            //移除画图物理坐标并重置
+            phisicsX.RemoveRange(0, phisicsX.Count);
+            phisicsY.RemoveRange(0, phisicsY.Count);
+            for (int i = 0; i < xVal.Count; i++)
+            {
+                phisicsX.Add(this.ToPhysicsX(xVal.ElementAt(i)));
+                phisicsY.Add(this.ToPhysicsY(yVal.ElementAt(i)));
+            }
+            //重置重排后的物理坐标
+            phisicsXReorder.RemoveRange(0, phisicsXReorder.Count);
+            phisicsYReorder.RemoveRange(0, phisicsYReorder.Count);
+            for (int i = 0; i < xValReorder.Count; i++)
+            {
+                phisicsXReorder.Add(this.ToPhysicsX(xValReorder.ElementAt(i)));
+                phisicsYReorder.Add(this.ToPhysicsY(yValReorder.ElementAt(i)));
+            }
+            //物理坐标原点重置
+            originPoint = new Point((int)this.ToPhysicsX(originX), (int)this.ToPhysicsY(originY));
+            Invalidate();//窗口刷新
+        }
+        #endregion
+
         private void AxisBox_Paint(object sender, PaintEventArgs e)
         {
             if (isPlotted)//画函数图的时候
@@ -559,27 +1050,27 @@ namespace AxisBox
                     g.DrawLine(axisPen, marginWidth, originPoint.Y, marginWidth + plotArea.Width, originPoint.Y);
                     if (xTickOn)
                     {
-                        double xTemp = originX;
+                        decimal xTemp = Convert.ToDecimal(originX);//之所以用decimal是为了不产生精度损失
                         while (true)//画x正方向刻度
                         {
-                            xTemp = xTemp + xStep;
-                            if (xTemp > xMax)
-                                break;
-                            int physicsXTemp = (int)this.ToPhysicsX(xTemp);
+                            int physicsXTemp = (int)this.ToPhysicsX(Convert.ToDouble(xTemp));
                             g.DrawLine(axisPen, physicsXTemp, originPoint.Y - 4, physicsXTemp, originPoint.Y);
                             if (xTickLabelOn)
                             {
                                 g.DrawString(Convert.ToString(xTemp), new Font("宋体", 9), new SolidBrush(axisAndLabelColor),
-                                                                    new PointF(physicsXTemp, originPoint.Y + 2)); 
+                                                                    new PointF(physicsXTemp, originPoint.Y + 2));
                             }
+                            xTemp = xTemp + Convert.ToDecimal(xStep);
+                            if (xTemp > Convert.ToDecimal(xMax))
+                                break;
                         }
-                        xTemp = originX;
+                        xTemp = Convert.ToDecimal(originX);
                         while (true)//画x反方向刻度
                         {
-                            xTemp = xTemp - xStep;
-                            if (xTemp < xMin)
+                            xTemp = xTemp - Convert.ToDecimal(xStep);
+                            if (xTemp < Convert.ToDecimal(xMin))
                                 break;
-                            int physicsXTemp = (int)this.ToPhysicsX(xTemp);
+                            int physicsXTemp = (int)this.ToPhysicsX(Convert.ToDouble(xTemp));
                             g.DrawLine(axisPen, physicsXTemp, originPoint.Y - 4, physicsXTemp, originPoint.Y);
                             if (xTickLabelOn)
                             {
@@ -595,7 +1086,7 @@ namespace AxisBox
                         int xLabelWidth = (int)sizeOfXLabel.Width;
                         int xLabelHeight = (int)sizeOfXLabel.Height;
                         g.DrawString(xLabel, new Font("宋体", xLabelSize), new SolidBrush(axisAndLabelColor),
-                                        new PointF(this.Width - marginWidth - 2 * xLabelWidth, originPoint.Y + xLabelHeight)); 
+                            new PointF(this.Width - marginWidth - 2 * xLabelWidth, originPoint.Y - xLabelHeight - 4));
                     }
                 }
                 #endregion
@@ -606,13 +1097,10 @@ namespace AxisBox
                     g.DrawLine(axisPen, originPoint.X, marginHeight + plotArea.Height, originPoint.X, marginHeight);
                     if (yTickOn)
                     {
-                        double yTemp = originY;
+                        decimal yTemp = Convert.ToDecimal(originY);//之所以用decimal是为了不产生精度损失
                         while (true)//画y正方向刻度
                         {
-                            yTemp = yTemp + yStep;
-                            if (yTemp > yMax)
-                                break;
-                            int physicsYTemp = (int)this.ToPhysicsY(yTemp);
+                            int physicsYTemp = (int)this.ToPhysicsY(Convert.ToDouble(yTemp));
                             g.DrawLine(axisPen, originPoint.X, physicsYTemp, originPoint.X + 4, physicsYTemp);
                             SizeF sizeOfYTick = g.MeasureString(Convert.ToString(yTemp), new Font("宋体", 9));
                             int yTickWidth = (int)sizeOfYTick.Width;
@@ -621,14 +1109,17 @@ namespace AxisBox
                                 g.DrawString(Convert.ToString(yTemp), new Font("宋体", 9), new SolidBrush(axisAndLabelColor),
                                                                     new PointF(originPoint.X - yTickWidth, physicsYTemp)); 
                             }
+                            yTemp = yTemp + Convert.ToDecimal(yStep);
+                            if (yTemp > Convert.ToDecimal(yMax))
+                                break;
                         }
-                        yTemp = originY;
+                        yTemp = Convert.ToDecimal(originY);
                         while (true)//画y反方向刻度
                         {
-                            yTemp = yTemp - yStep;
-                            if (yTemp < yMin)
+                            yTemp = yTemp - Convert.ToDecimal(yStep);
+                            if (yTemp < Convert.ToDecimal(yMin))
                                 break;
-                            int physicsYTemp = (int)this.ToPhysicsY(yTemp);
+                            int physicsYTemp = (int)this.ToPhysicsY(Convert.ToDouble(yTemp));
                             g.DrawLine(axisPen, originPoint.X, physicsYTemp, originPoint.X + 4, physicsYTemp);
                             SizeF sizeOfYTick = g.MeasureString(Convert.ToString(yTemp), new Font("宋体", 9));
                             int yTickWidth = (int)sizeOfYTick.Width;
@@ -752,284 +1243,6 @@ namespace AxisBox
                 g.FillRectangle(background, plotArea);
             }
         }
-        #region 辅助函数
-        private Matrix ToPhysicsX(Matrix xCoordinate)
-        {
-            Matrix result = Matrix.Zeros(xCoordinate.Rows, xCoordinate.Columns);
-            for (int i = 0; i < result.Rows; i++)
-            {
-                for (int j = 0; j < result.Columns; j++)
-                {
-                    result[i, j] = this.ToPhysicsX(xCoordinate[i, j]);
-                }
-            }
-            return result;
-        }
-        private Matrix ToPhysicsY(Matrix yCoordinate)
-        {
-            Matrix result = Matrix.Zeros(yCoordinate.Rows, yCoordinate.Columns);
-            for (int i = 0; i < result.Rows; i++)
-            {
-                for (int j = 0; j < result.Columns; j++)
-                {
-                    result[i, j] = this.ToPhysicsY(yCoordinate[i, j]);
-                }
-            }
-            return result;
-        }
-        private double ToPhysicsX(double xCoordinate)
-        {
-            double result;
-            if (!xLog)
-            {
-                result = (xCoordinate - xMin) / (xMax - xMin) * plotArea.Width + marginWidth;
-            }
-            else
-            {
-                double logRange = Math.Log10(xMax) - Math.Log10(xMin);
-                double leftLength = Math.Log10(xCoordinate) - Math.Log10(xMin);
-                result = leftLength / logRange * plotArea.Width + marginWidth;
-            }
-            return result;
-        }
-        private double ToPhysicsY(double yCoordinate)
-        {
-            double result;
-            if (!yLog)
-            {
-                result = (yMax - yCoordinate) / (yMax - yMin) * plotArea.Height + marginHeight;
-            }
-            else
-            {
-                double logRange = Math.Log10(yMax) - Math.Log10(yMin);
-                double upHeight = Math.Log10(yMax) - Math.Log10(yCoordinate);
-                result = upHeight / logRange * plotArea.Height + marginHeight;
-            }
-            return result;
-        }
-        private double ToActualX(int xCoordinate)
-        {
-            double result;
-            if (!xLog)
-            {
-                result = (xCoordinate - marginWidth) / plotArea.Width * (xMax - xMin) + xMin;
-            }
-            else
-            {
-                double logRange = Math.Log10(xMax) - Math.Log10(xMin);
-                result = Math.Pow(10, (xCoordinate - marginWidth) / plotArea.Width * logRange + Math.Log10(xMin));
-            }
-            return result;
-        }
-        private double ToActualY(int yCoordinate)
-        {
-            double result;
-            if (!yLog)
-            {
-                result = (this.Height - yCoordinate - marginHeight) / plotArea.Height * (yMax - yMin) + yMin;
-            }
-            else
-            {
-                double logRange = Math.Log10(yMax) - Math.Log10(yMin);
-                result = Math.Pow(10, (this.Height - yCoordinate) / plotArea.Height * logRange + Math.Log10(yMin));
-            }
-            return result;
-        }
-        private int[] FindIndex(Matrix x, double y)
-        {
-            //返回两个表示y在x中的下标范围的index
-            int left = 0;
-            int right = x.Columns-1;
-            while(right>(left+1))
-            {
-                if (x[0, left] == y)
-                    return new int[2] { left, left };
-                if (x[0, right] == y)
-                    return new int[2] { right, right };
-                int middle = (int)((left + right) / 2);
-                if ((x[0, left] - y) * (x[0, middle] - y) < 0)
-                {
-                    right = middle;
-                }
-                else
-                {
-                    left = middle;
-                }
-            }
-            return new int[2] { left, right };
-        }
-        private void getReorderedVersion()//按照x从小到大排列,同时相应的改变y的排列
-        {
-            xValReorder.RemoveRange(0, xValReorder.Count);
-            yValReorder.RemoveRange(0, yValReorder.Count);
-            for (int i = 0; i < xVal.Count; i++)
-            {
-                xValReorder.Add(new Matrix(xVal.ElementAt(i)));
-                yValReorder.Add(new Matrix(yVal.ElementAt(i)));
-                for (int j = 1; j < xValReorder.ElementAt(i).Columns; j++)
-                {
-                    for (int k = 0; k < xValReorder.ElementAt(i).Columns - j; k++)
-                    {
-                        if (xValReorder.ElementAt(i)[0, k] > xValReorder.ElementAt(i)[0, k + 1])
-                        {
-                            xValReorder.ElementAt(i)[0, k] = xValReorder.ElementAt(i)[0, k + 1] + 
-                                                                xValReorder.ElementAt(i)[0, k];
-                            xValReorder.ElementAt(i)[0, k + 1] = xValReorder.ElementAt(i)[0, k] -
-                                                                xValReorder.ElementAt(i)[0, k + 1];
-                            xValReorder.ElementAt(i)[0, k] = xValReorder.ElementAt(i)[0, k] -
-                                                                xValReorder.ElementAt(i)[0, k + 1];
-                            yValReorder.ElementAt(i)[0, k] = yValReorder.ElementAt(i)[0, k] +
-                                                                yValReorder.ElementAt(i)[0, k + 1];
-                            yValReorder.ElementAt(i)[0, k + 1] = yValReorder.ElementAt(i)[0, k] -
-                                                                    yValReorder.ElementAt(i)[0, k + 1];
-                            yValReorder.ElementAt(i)[0, k] = yValReorder.ElementAt(i)[0, k] - 
-                                                                yValReorder.ElementAt(i)[0, k + 1];
-                        }
-                    }
-                }
-            }
-        }
-        //对数坐标时只要改变一下原点和步距再刷新下数据就可以
-        private void XToLog()
-        {
-            xMin = Matrix.MinOfRow(xVal.ElementAt(0))[0, 0];
-            xMax = Matrix.MaxOfRow(xVal.ElementAt(0))[0, 0];
-            if (xVal.Count != 1)
-            {
-                for (int i = 1; i < xVal.Count; i++)
-                {
-                    double min1 = Matrix.MinOfRow(xVal.ElementAt(i))[0, 0];
-                    double max1 = Matrix.MaxOfRow(xVal.ElementAt(i))[0, 0];
-                    if (xMin > min1)
-                        xMin = min1;
-                    if (xMax < max1)
-                        xMax = max1;
-                }
-            }
-            xMin = Math.Pow(10, Math.Floor(Math.Log10(xMin)));
-            xMax = Math.Pow(10, Math.Ceiling(Math.Log10(xMax)));
-            if (xMin == xMax)
-            {
-                xMin = Math.Pow(10, Math.Log10(xMin) - 1);
-                xMax = Math.Pow(10, Math.Log10(xMax) + 1);
-            }
-            double xRange = xMax - xMin;
-            xStep = Math.Pow(10, Math.Round(Math.Log10(xRange / 10), MidpointRounding.AwayFromZero));
-            originX = Math.Round(((xMax - xMin) / 10 + xMin) / xStep, MidpointRounding.AwayFromZero) * xStep;
-        }
-        private void YToLog()
-        {
-            yMin = Matrix.MinOfRow(yVal.ElementAt(0))[0, 0];
-            yMax = Matrix.MaxOfRow(yVal.ElementAt(0))[0, 0];
-            if (yVal.Count != 1)
-            {
-                for (int i = 1; i < yVal.Count; i++)
-                {
-                    double min2 = Matrix.MinOfRow(yVal.ElementAt(i))[0, 0];
-                    double max2 = Matrix.MaxOfRow(yVal.ElementAt(i))[0, 0];
-                    if (yMin > min2)
-                        yMin = min2;
-                    if (yMax < max2)
-                        yMax = max2;
-                }
-            }
-            yMin = Math.Pow(10, Math.Floor(Math.Log10(yMin)));
-            yMax = Math.Pow(10, Math.Ceiling(Math.Log10(yMax)));
-            if (yMin == yMax)//说明在画平行于x轴的直线
-            {
-                yMin = Math.Pow(10, Math.Log10(yMin) - 1);
-                yMax = Math.Pow(10, Math.Log10(yMax) + 1);
-            }
-            double yRange = yMax - yMin;
-            yStep = Math.Pow(10, Math.Round(Math.Log10(yRange / 10), MidpointRounding.AwayFromZero));
-            originY = Math.Round(((yMax - yMin) / 10 + yMin) / yStep, MidpointRounding.AwayFromZero) * yStep;
-        }
-        private void XToLinear()
-        {
-            xMin = Matrix.MinOfRow(xVal.ElementAt(0))[0, 0];
-            xMax = Matrix.MaxOfRow(xVal.ElementAt(0))[0, 0];
-            if (xVal.Count != 1)
-            {
-                for (int i = 1; i < xVal.Count; i++)
-                {
-                    double min1 = Matrix.MinOfRow(xVal.ElementAt(i))[0, 0];
-                    double max1 = Matrix.MaxOfRow(xVal.ElementAt(i))[0, 0];
-                    if (xMin > min1)
-                        xMin = min1;
-                    if (xMax < max1)
-                        xMax = max1;
-                }
-            }
-            if (xMin == xMax)//说明在画平行于y轴的直线
-            {
-                xMin = xMin - 3;
-                xMax = xMax + 3;
-            }
-            xMin = xMin - (xMax - xMin) * 0.02;
-            xMax = xMax + (xMax - xMin) * 0.02;
-            double xRange = xMax - xMin;
-            xStep = Math.Pow(10, Math.Round(Math.Log10(xRange / 10), MidpointRounding.AwayFromZero));
-            originX = Math.Round(((xMax - xMin) / 10 + xMin) / xStep, MidpointRounding.AwayFromZero) * xStep;
-        }
-        private void YToLinear()
-        {
-            yMin = Matrix.MinOfRow(yVal.ElementAt(0))[0, 0];
-            yMax = Matrix.MaxOfRow(yVal.ElementAt(0))[0, 0];
-            if (yVal.Count != 1)
-            {
-                for (int i = 1; i < yVal.Count; i++)
-                {
-                    double min2 = Matrix.MinOfRow(yVal.ElementAt(i))[0, 0];
-                    double max2 = Matrix.MaxOfRow(yVal.ElementAt(i))[0, 0];
-                    if (yMin > min2)
-                        yMin = min2;
-                    if (yMax < max2)
-                        yMax = max2;
-                }
-            }
-            if (yMin == yMax)//说明在画平行于x轴的直线
-            {
-                yMax = yMax + 3;
-                yMin = yMin - 3;
-            }
-            yMin = yMin - (yMax - yMin) * 0.02;
-            yMax = yMax + (yMax - yMin) * 0.02;
-            double yRange = yMax - yMin;
-            yStep = Math.Pow(10, Math.Round(Math.Log10(yRange / 10), MidpointRounding.AwayFromZero));
-            while ((yMax - yMin) / yStep <= 4)
-            {
-                yStep = (yMax - yMin) / 8;
-                yStep = Math.Pow(10, Math.Round(yStep));
-            }
-            originY = Math.Round(((yMax - yMin) / 10 + yMin) / yStep, MidpointRounding.AwayFromZero) * yStep;
-        }
-        private void refreshParameter()
-        {
-            marginWidth = (int)(this.Width / 20);
-            marginHeight = (int)(this.Height / 20);
-            plotArea = new Rectangle(marginWidth, marginHeight,
-                                        this.Width - 2 * marginWidth, this.Height - 2 * marginHeight);
-            //移除画图物理坐标并重置
-            phisicsX.RemoveRange(0, phisicsX.Count);
-            phisicsY.RemoveRange(0, phisicsY.Count);
-            for (int i = 0; i < xVal.Count; i++)
-            {
-                phisicsX.Add(this.ToPhysicsX(xVal.ElementAt(i)));
-                phisicsY.Add(this.ToPhysicsY(yVal.ElementAt(i)));
-            }
-            //重置重排后的物理坐标
-            phisicsXReorder.RemoveRange(0, phisicsXReorder.Count);
-            phisicsYReorder.RemoveRange(0, phisicsYReorder.Count);
-            for (int i = 0; i < xValReorder.Count; i++)
-            {
-                phisicsXReorder.Add(this.ToPhysicsX(xValReorder.ElementAt(i)));
-                phisicsYReorder.Add(this.ToPhysicsY(yValReorder.ElementAt(i)));
-            }
-            //物理坐标原点重置
-            originPoint = new Point((int)this.ToPhysicsX(originX), (int)this.ToPhysicsY(originY));
-            Invalidate();//窗口刷新
-        }
-        #endregion
 
         private void AxisBox_MouseMove(object sender, MouseEventArgs e)//鼠标移动可以自动捕捉坐标点
         {

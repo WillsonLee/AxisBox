@@ -4,6 +4,37 @@
         <name>AxisBox</name>
     </assembly>
     <members>
+        <member name="T:AxisBox.Properties.Resources">
+            <summary>
+              一个强类型的资源类，用于查找本地化的字符串等。
+            </summary>
+        </member>
+        <member name="P:AxisBox.Properties.Resources.ResourceManager">
+            <summary>
+              返回此类使用的缓存的 ResourceManager 实例。
+            </summary>
+        </member>
+        <member name="P:AxisBox.Properties.Resources.Culture">
+            <summary>
+              使用此强类型资源类，为所有资源查找
+              重写当前线程的 CurrentUICulture 属性。
+            </summary>
+        </member>
+        <member name="P:AxisBox.Properties.Resources.UserDefinedControl">
+            <summary>
+              查找 System.Drawing.Bitmap 类型的本地化资源。
+            </summary>
+        </member>
+        <member name="T:AxisBox.AxisBox">
+            <summary>
+            函数画图板控件
+            </summary>
+        </member>
+        <member name="M:AxisBox.AxisBox.#ctor">
+            <summary>
+            构造器
+            </summary>
+        </member>
         <member name="M:AxisBox.AxisBox.Plot">
             <summary>
                     在AxisBox上画出默认的y=x图像(x范围0-10,步距为1,,11个数据点)
@@ -38,6 +69,166 @@
             <summary>
             设计器支持所需的方法 - 不要
             使用代码编辑器修改此方法的内容。
+            </summary>
+        </member>
+        <member name="P:AxisBox.AxisBox.XAxisOn">
+            <summary>
+            x轴是否显示
+            </summary>
+        </member>
+        <member name="P:AxisBox.AxisBox.YAxisOn">
+            <summary>
+            y轴是否显示
+            </summary>
+        </member>
+        <member name="P:AxisBox.AxisBox.XLog">
+            <summary>
+            x轴是否取对数坐标
+            </summary>
+        </member>
+        <member name="P:AxisBox.AxisBox.YLog">
+            <summary>
+            y轴是否取对数坐标
+            </summary>
+        </member>
+        <member name="P:AxisBox.AxisBox.GridOn">
+            <summary>
+            网格是否打开
+            </summary>
+        </member>
+        <member name="P:AxisBox.AxisBox.HoldOn">
+            <summary>
+            是否允许多图形绘制
+            </summary>
+        </member>
+        <member name="P:AxisBox.AxisBox.TitleOn">
+            <summary>
+            是否显示标题
+            </summary>
+        </member>
+        <member name="P:AxisBox.AxisBox.XLabelOn">
+            <summary>
+            是否显示x轴标签
+            </summary>
+        </member>
+        <member name="P:AxisBox.AxisBox.YLabelOn">
+            <summary>
+            是否显示y轴标签
+            </summary>
+        </member>
+        <member name="P:AxisBox.AxisBox.XTickOn">
+            <summary>
+            是否显示x轴刻度
+            </summary>
+        </member>
+        <member name="P:AxisBox.AxisBox.YTickOn">
+            <summary>
+            是否显示y轴刻度
+            </summary>
+        </member>
+        <member name="P:AxisBox.AxisBox.XTickLabelOn">
+            <summary>
+            是否显示x刻度读数
+            </summary>
+        </member>
+        <member name="P:AxisBox.AxisBox.YTickLabelOn">
+            <summary>
+            是否显示y轴刻度读数
+            </summary>
+        </member>
+        <member name="P:AxisBox.AxisBox.CaptureMode">
+            <summary>
+            是否打开坐标点捕捉模式
+            </summary>
+        </member>
+        <member name="P:AxisBox.AxisBox.DarkTheme">
+            <summary>
+            是否启用黑色主题模式
+            </summary>
+        </member>
+        <member name="P:AxisBox.AxisBox.XLabel">
+            <summary>
+            x轴标签内容
+            </summary>
+        </member>
+        <member name="P:AxisBox.AxisBox.YLabel">
+            <summary>
+            y轴标签内容
+            </summary>
+        </member>
+        <member name="P:AxisBox.AxisBox.PlotTitle">
+            <summary>
+            标题内容
+            </summary>
+        </member>
+        <member name="P:AxisBox.AxisBox.XLabelSize">
+            <summary>
+            x轴标签文本字体大小
+            </summary>
+        </member>
+        <member name="P:AxisBox.AxisBox.YLabelSize">
+            <summary>
+            y标签文本字体大小
+            </summary>
+        </member>
+        <member name="P:AxisBox.AxisBox.PlotTitleSize">
+            <summary>
+            标题文本字体大小
+            </summary>
+        </member>
+        <member name="P:AxisBox.AxisBox.XStep">
+            <summary>
+            x轴分度值
+            </summary>
+        </member>
+        <member name="P:AxisBox.AxisBox.YStep">
+            <summary>
+            y轴分度值
+            </summary>
+        </member>
+        <member name="P:AxisBox.AxisBox.XMin">
+            <summary>
+            x最小值
+            </summary>
+        </member>
+        <member name="P:AxisBox.AxisBox.XMax">
+            <summary>
+            x最大值
+            </summary>
+        </member>
+        <member name="P:AxisBox.AxisBox.YMin">
+            <summary>
+            y最小值
+            </summary>
+        </member>
+        <member name="P:AxisBox.AxisBox.YMax">
+            <summary>
+            y最大值
+            </summary>
+        </member>
+        <member name="P:AxisBox.AxisBox.CurveColor">
+            <summary>
+            函数曲线颜色
+            </summary>
+        </member>
+        <member name="P:AxisBox.AxisBox.BorderColor">
+            <summary>
+            边框颜色
+            </summary>
+        </member>
+        <member name="P:AxisBox.AxisBox.BackgroundColor">
+            <summary>
+            背景色
+            </summary>
+        </member>
+        <member name="P:AxisBox.AxisBox.AxisAndLabelColor">
+            <summary>
+            坐标轴、文本标签和网格颜色
+            </summary>
+        </member>
+        <member name="P:AxisBox.AxisBox.CurveDashStyle">
+            <summary>
+            函数曲线线型
             </summary>
         </member>
     </members>

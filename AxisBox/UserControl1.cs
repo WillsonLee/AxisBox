@@ -39,6 +39,7 @@ namespace AxisBox
         private bool captureMode = true;//捕捉状态
         private bool capture = false;//是否捕捉到点
         private bool darkTheme = false;
+        private bool systemContextMenuOn = true;//决定是否启用在这里定义的右键菜单还是自定义右键菜单
         //绘图属性
         private string xLabel = "x";
         private string yLabel = "y";
@@ -67,6 +68,7 @@ namespace AxisBox
         private Point capturePoint = new Point(0, 0);
         private PointF capturePointActual = new PointF(0, 0);
         private int sensitivity = 30;//表示捕捉点的敏感度,默认为半径20像素以内
+        private List<int> targetsBeenFitted = new List<int>();//表示哪些曲线已经被拟合过了
         //绘图数据
         private List<Matrix> xVal = new List<Matrix>();
         private List<Matrix> yVal = new List<Matrix>();
@@ -392,6 +394,25 @@ namespace AxisBox
                 {
                     discreteOn = value;
                     Invalidate(); 
+                }
+            }
+        }
+        /// <summary>
+        /// 是否使用控件自带右键菜单
+        /// </summary>
+        public bool UsingSystemContextMenu
+        {
+            get { return systemContextMenuOn; }
+            set
+            {
+                systemContextMenuOn = value;
+                if (value)
+                {
+                    ContextMenuStrip = contextMenuStrip1;
+                }
+                else
+                {
+                    ContextMenuStrip = null;
                 }
             }
         }
@@ -835,6 +856,7 @@ namespace AxisBox
             xValRepository.RemoveRange(0, xValRepository.Count);
             yValRepository.RemoveRange(0, yValRepository.Count);
             isPlotted = false;
+            refit = false;
             refreshParameter();
         }
         /// <summary>
@@ -1356,10 +1378,25 @@ namespace AxisBox
             
         }
 
+        private void fitTargetToolStripComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            fitActionToolStripMenuItem.Enabled = true;
+            for (int i = 0; i < targetsBeenFitted.Count; i++)
+            {
+                if (fitTargetToolStripComboBox.SelectedIndex == targetsBeenFitted.ElementAt(i))
+                {
+                    fitActionToolStripMenuItem.Enabled = false;
+                }
+            }
+        }
+
         private void fitActionToolStripMenuItem_Click(object sender, EventArgs e)
         {
             FitTimes = fitTimesToolStripComboBox.SelectedIndex + 1;
             this.Fit(fitTargetToolStripComboBox.SelectedIndex);
+            plotToolStripMenuItem.Enabled = false;
+            targetsBeenFitted.Add(fitTargetToolStripComboBox.SelectedIndex);
+            fitActionToolStripMenuItem.Enabled = false;
         }
 
         private void removeAllFncToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1386,6 +1423,8 @@ namespace AxisBox
             yTickOnToolStripMenuItem.Enabled = false;
             darkThemeToolStripMenuItem.Enabled = false;
             #endregion
+            plotToolStripMenuItem.Enabled = true;
+            targetsBeenFitted.RemoveRange(0, targetsBeenFitted.Count);
         }
 
         private void gridOnToolStripMenuItem_Click(object sender, EventArgs e)

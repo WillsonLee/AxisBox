@@ -267,6 +267,11 @@
             是否画出离散数据点
             </summary>
         </member>
+        <member name="P:AxisBox.AxisBox.UsingSystemContextMenu">
+            <summary>
+            是否使用控件自带右键菜单
+            </summary>
+        </member>
         <member name="P:AxisBox.AxisBox.XLabel">
             <summary>
             x轴标签内容

@@ -144,6 +144,7 @@
             this.fitTargetToolStripComboBox.Name = "fitTargetToolStripComboBox";
             this.fitTargetToolStripComboBox.Size = new System.Drawing.Size(121, 25);
             this.fitTargetToolStripComboBox.Tag = "";
+            this.fitTargetToolStripComboBox.SelectedIndexChanged += new System.EventHandler(this.fitTargetToolStripComboBox_SelectedIndexChanged);
             // 
             // toolStripMenuItem4
             // 

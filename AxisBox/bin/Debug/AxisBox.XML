@@ -25,6 +25,103 @@
               查找 System.Drawing.Bitmap 类型的本地化资源。
             </summary>
         </member>
+        <member name="T:AxisBox.SettingForm">
+            <summary>
+            更多设置弹出窗口
+            </summary>
+        </member>
+        <member name="F:AxisBox.SettingForm.borderColor">
+            <summary>
+            边框颜色设置
+            </summary>
+        </member>
+        <member name="F:AxisBox.SettingForm.background">
+            <summary>
+            背景色设置
+            </summary>
+        </member>
+        <member name="F:AxisBox.SettingForm.axisAndLabelColor">
+            <summary>
+            轴网及标签颜色设置
+            </summary>
+        </member>
+        <member name="F:AxisBox.SettingForm.curveColor">
+            <summary>
+            曲线颜色
+            </summary>
+        </member>
+        <member name="F:AxisBox.SettingForm.discretePointColor">
+            <summary>
+            离散点颜色
+            </summary>
+        </member>
+        <member name="F:AxisBox.SettingForm.curveDashStyle">
+            <summary>
+            曲线线型
+            </summary>
+        </member>
+        <member name="M:AxisBox.SettingForm.#ctor">
+            <summary>
+            构造函数
+            </summary>
+        </member>
+        <member name="F:AxisBox.SettingForm.components">
+            <summary>
+            Required designer variable.
+            </summary>
+        </member>
+        <member name="M:AxisBox.SettingForm.Dispose(System.Boolean)">
+            <summary>
+            Clean up any resources being used.
+            </summary>
+            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        </member>
+        <member name="M:AxisBox.SettingForm.InitializeComponent">
+            <summary>
+            Required method for Designer support - do not modify
+            the contents of this method with the code editor.
+            </summary>
+        </member>
+        <member name="F:AxisBox.SettingForm.titleTextBox">
+            <summary>
+            标题文本设置框
+            </summary>
+        </member>
+        <member name="F:AxisBox.SettingForm.titleTrackBar">
+            <summary>
+            标题字号设置滑块
+            </summary>
+        </member>
+        <member name="F:AxisBox.SettingForm.yLabelTextBox">
+            <summary>
+            y轴标签文本设置框
+            </summary>
+        </member>
+        <member name="F:AxisBox.SettingForm.xLabelTextBox">
+            <summary>
+            x轴标签文本设置框
+            </summary>
+        </member>
+        <member name="F:AxisBox.SettingForm.yLabelSizeTrackBar">
+            <summary>
+            y轴标签字号设置滑块
+            </summary>
+        </member>
+        <member name="F:AxisBox.SettingForm.xLabelSizeTrackBar">
+            <summary>
+            x轴标签字号设置滑块
+            </summary>
+        </member>
+        <member name="F:AxisBox.SettingForm.colorDesComboBox">
+            <summary>
+            颜色设置目标设定多选框
+            </summary>
+        </member>
+        <member name="F:AxisBox.SettingForm.colorSetPanel">
+            <summary>
+            颜色设置块
+            </summary>
+        </member>
         <member name="T:AxisBox.AxisBox">
             <summary>
             函数画图板控件
@@ -37,22 +134,36 @@
         </member>
         <member name="M:AxisBox.AxisBox.Plot">
             <summary>
-                    在AxisBox上画出默认的y=x图像(x范围0-10,步距为1,,11个数据点)
+            在AxisBox上画出默认的y=x图像(x范围0-10,步距为1,,11个数据点)
             </summary>
         </member>
         <member name="M:AxisBox.AxisBox.Plot(MatrixTool.Matrix,MatrixTool.Matrix)">
             <summary>
-                    在AxisBox上由给出x、y坐标画出曲线
+            在AxisBox上由给出x、y坐标画出曲线
             </summary>
             <param name="x">x行向量</param>
             <param name="y">y行向量</param>
         </member>
         <member name="M:AxisBox.AxisBox.Plot(System.Double[],System.Double[])">
             <summary>
-                    在AxisBox上由给出x、y坐标画出曲线
+            在AxisBox上由给出x、y坐标画出曲线
             </summary>
             <param name="xArray">一维数组</param>
             <param name="yArray">一维数组</param>
+        </member>
+        <member name="M:AxisBox.AxisBox.RemoveAllFnc">
+            <summary>
+            移去所有已画函数
+            </summary>
+        </member>
+        <member name="M:AxisBox.AxisBox.Fit(System.Int32)">
+            <summary>
+            拟合曲线
+            如果要画多曲线需要先把所有曲线画出来然后再拟合;
+            每条曲线拟合一次,不要对已经拟合过的曲线再次拟合,否则可能有不可预知错误
+            </summary>
+            <param name="index">拟合的是第几组数据(默认是第一组)</param>
+            <returns></returns>
         </member>
         <member name="F:AxisBox.AxisBox.components">
             <summary>
@@ -83,12 +194,12 @@
         </member>
         <member name="P:AxisBox.AxisBox.XLog">
             <summary>
-            x轴是否取对数坐标
+            x轴是否取对数坐标(注意只有x数据不越过数据0才能转换成对数坐标)
             </summary>
         </member>
         <member name="P:AxisBox.AxisBox.YLog">
             <summary>
-            y轴是否取对数坐标
+            y轴是否取对数坐标(注意只有y数据不越过数据0才能转换成对数坐标)
             </summary>
         </member>
         <member name="P:AxisBox.AxisBox.GridOn">
@@ -146,6 +257,16 @@
             是否启用黑色主题模式
             </summary>
         </member>
+        <member name="P:AxisBox.AxisBox.ContinuousOn">
+            <summary>
+            是否画出连续曲线
+            </summary>
+        </member>
+        <member name="P:AxisBox.AxisBox.DiscreteOn">
+            <summary>
+            是否画出离散数据点
+            </summary>
+        </member>
         <member name="P:AxisBox.AxisBox.XLabel">
             <summary>
             x轴标签内容
@@ -174,6 +295,16 @@
         <member name="P:AxisBox.AxisBox.PlotTitleSize">
             <summary>
             标题文本字体大小
+            </summary>
+        </member>
+        <member name="P:AxisBox.AxisBox.RadiusOfSamplePoint">
+            <summary>
+            离散数据点绘制半径
+            </summary>
+        </member>
+        <member name="P:AxisBox.AxisBox.FitTimes">
+            <summary>
+            进行曲线拟合的拟合次数
             </summary>
         </member>
         <member name="P:AxisBox.AxisBox.XStep">
@@ -209,6 +340,11 @@
         <member name="P:AxisBox.AxisBox.CurveColor">
             <summary>
             函数曲线颜色
+            </summary>
+        </member>
+        <member name="P:AxisBox.AxisBox.SamplePointColor">
+            <summary>
+            离散数据点的绘制颜色
             </summary>
         </member>
         <member name="P:AxisBox.AxisBox.BorderColor">

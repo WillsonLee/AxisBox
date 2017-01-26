@@ -33,6 +33,9 @@ namespace AxisBox
         private bool yLabelOn = true;
         private bool xTickLabelOn = true;
         private bool yTickLabelOn = true;
+        private bool continuousOn = true;
+        private bool discreteOn = false;
+        private bool refit = false;//是否把数据点重新拟合过
         private bool captureMode = true;//捕捉状态
         private bool capture = false;//是否捕捉到点
         private bool darkTheme = false;
@@ -47,15 +50,20 @@ namespace AxisBox
         private Rectangle plotArea;
         private int marginWidth;
         private int marginHeight;
-        private Color boardColor = Color.LightGray;//边框颜色
+        private Color borderColor = Color.LightGray;//边框颜色
         private Color backgroundColor = Color.White;//背景颜色
         private Color axisAndLabelColor = Color.Black;//坐标线及标签文本颜色
         private Color lineColor = Color.Blue;//默认图线颜色
+        private Color samplePointColor = Color.Blue;//默认离散数据点颜色
+        private int radiusOfSamplePoint = 4;//默认离散点半径(大小)
+        private int fitTimes = 1;//拟合次数
         private System.Drawing.Drawing2D.DashStyle lineDashStyle =System.Drawing.Drawing2D.DashStyle.Solid;//默认为实线
         private List<Matrix> phisicsX = new List<Matrix>();
         private List<Matrix> phisicsY = new List<Matrix>();
         private List<Matrix> phisicsXReorder = new List<Matrix>();
         private List<Matrix> phisicsYReorder = new List<Matrix>();
+        private List<Matrix> phisicsXRepository = new List<Matrix>();//如果重新拟合过数据点可能改变
+        private List<Matrix> phisicsYRepository = new List<Matrix>();//用这两个来保存源数据点的数据
         private Point capturePoint = new Point(0, 0);
         private PointF capturePointActual = new PointF(0, 0);
         private int sensitivity = 30;//表示捕捉点的敏感度,默认为半径20像素以内
@@ -64,6 +72,8 @@ namespace AxisBox
         private List<Matrix> yVal = new List<Matrix>();
         private List<Matrix> xValReorder = new List<Matrix>();
         private List<Matrix> yValReorder = new List<Matrix>();
+        private List<Matrix> xValRepository = new List<Matrix>();
+        private List<Matrix> yValRepository = new List<Matrix>();
         private double xStep;
         private double yStep;
         private double xMin;
@@ -75,7 +85,7 @@ namespace AxisBox
         #endregion
 
         #region 访问器
-        //在调用Plot函数前,任何属性都是不可改的//即没有画函数图前改属性没有意义
+        //在调用Plot函数前,部分属性是不可改的//即尽量任何属性的更改都在使用Plot函数之后
         /// <summary>
         /// x轴是否显示
         /// </summary>
@@ -107,7 +117,7 @@ namespace AxisBox
             }
         }
         /// <summary>
-        /// x轴是否取对数坐标
+        /// x轴是否取对数坐标(注意只有x数据不越过数据0才能转换成对数坐标)
         /// </summary>
         public bool XLog
         {
@@ -126,7 +136,7 @@ namespace AxisBox
                                 this.XToLog();//更新坐标原点及步距
                                 this.refreshParameter();//更新物理坐标参数
                                 Invalidate();
-                            } 
+                            }
                         }
                     }
                     else//改回线性坐标
@@ -143,7 +153,7 @@ namespace AxisBox
             }
         }
         /// <summary>
-        /// y轴是否取对数坐标
+        /// y轴是否取对数坐标(注意只有y数据不越过数据0才能转换成对数坐标)
         /// </summary>
         public bool YLog
         {
@@ -156,12 +166,12 @@ namespace AxisBox
                     {
                         if (yMax * yMin > 0)//如果正负坐标都有不能转化为对数坐标
                         {
-                            if (yLog!=value)
+                            if (yLog != value)
                             {
                                 yLog = value;
                                 this.YToLog();
                                 this.refreshParameter();
-                                Invalidate(); 
+                                Invalidate();
                             }
                         }
                     }
@@ -339,19 +349,49 @@ namespace AxisBox
                 darkTheme = value;
                 if (value)
                 {
-                    boardColor = Color.Black;
+                    borderColor = Color.Black;
                     backgroundColor = Color.Black;
                     axisAndLabelColor = Color.Yellow;
                 }
                 else
                 {
-                    boardColor = Color.LightGray;
+                    borderColor = Color.LightGray;
                     backgroundColor = Color.White;
                     axisAndLabelColor = Color.Black;
                 }
                 if (isPlotted)
                 {
                     Invalidate();
+                }
+            }
+        }
+        /// <summary>
+        /// 是否画出连续曲线
+        /// </summary>
+        public bool ContinuousOn
+        {
+            get { return continuousOn; }
+            set
+            {
+                if (isPlotted)
+                {
+                    continuousOn = value;
+                    Invalidate(); 
+                }
+            }
+        }
+        /// <summary>
+        /// 是否画出离散数据点
+        /// </summary>
+        public bool DiscreteOn
+        {
+            get { return discreteOn; }
+            set
+            {
+                if (isPlotted)
+                {
+                    discreteOn = value;
+                    Invalidate(); 
                 }
             }
         }
@@ -446,6 +486,35 @@ namespace AxisBox
             }
         }
         /// <summary>
+        /// 离散数据点绘制半径
+        /// </summary>
+        public int RadiusOfSamplePoint
+        {
+            get { return radiusOfSamplePoint; }
+            set
+            {
+                if (isPlotted)
+                {
+                    radiusOfSamplePoint = value;
+                    Invalidate(); 
+                }
+            }
+        }
+        /// <summary>
+        /// 进行曲线拟合的拟合次数
+        /// </summary>
+        public int FitTimes
+        {
+            get { return fitTimes; }
+            set
+            {
+                if (isPlotted)
+                {
+                    fitTimes = value;
+                }
+            }
+        }
+        /// <summary>
         /// x轴分度值
         /// </summary>
         public double XStep
@@ -487,9 +556,13 @@ namespace AxisBox
             {
                 if (isPlotted)
                 {
-                    xMin = value;
-                    refreshParameter();
-                    Invalidate();
+                    if (value<xMax)
+                    {
+                        xMin = value;
+                        originX = xMin;
+                        refreshParameter();
+                        Invalidate(); 
+                    }
                 }
             }
         }
@@ -503,9 +576,12 @@ namespace AxisBox
             {
                 if (isPlotted)
                 {
-                    xMax = value;
-                    refreshParameter();
-                    Invalidate();
+                    if (value>xMin)
+                    {
+                        xMax = value;
+                        refreshParameter();
+                        Invalidate(); 
+                    }
                 }
             }
         }
@@ -519,9 +595,13 @@ namespace AxisBox
             {
                 if (isPlotted)
                 {
-                    yMin = value;
-                    refreshParameter();
-                    Invalidate();
+                    if (value<yMax)
+                    {
+                        yMin = value;
+                        originY = yMin;
+                        refreshParameter();
+                        Invalidate(); 
+                    }
                 }
             }
         }
@@ -535,9 +615,12 @@ namespace AxisBox
             {
                 if (isPlotted)
                 {
-                    yMax = value;
-                    refreshParameter();
-                    Invalidate();
+                    if (value>yMin)
+                    {
+                        yMax = value;
+                        refreshParameter();
+                        Invalidate(); 
+                    }
                 }
             }
         }
@@ -557,16 +640,31 @@ namespace AxisBox
             }
         }
         /// <summary>
-        /// 边框颜色
+        /// 离散数据点的绘制颜色
         /// </summary>
-        public Color BorderColor
+        public Color SamplePointColor
         {
-            get { return boardColor; }
+            get { return samplePointColor; }
             set
             {
                 if (isPlotted)
                 {
-                    boardColor = value;
+                    samplePointColor = value;
+                    Invalidate();
+                }
+            }
+        }
+        /// <summary>
+        /// 边框颜色
+        /// </summary>
+        public Color BorderColor
+        {
+            get { return borderColor; }
+            set
+            {
+                if (isPlotted)
+                {
+                    borderColor = value;
                     this.Invalidate();
                 }
             }
@@ -631,16 +729,16 @@ namespace AxisBox
                                         this.Width - 2 * marginWidth, this.Height - 2 * marginHeight);
         }
         /// <summary>
-        ///         在AxisBox上画出默认的y=x图像(x范围0-10,步距为1,,11个数据点)
+        /// 在AxisBox上画出默认的y=x图像(x范围0-10,步距为1,,11个数据点)
         /// </summary>
         public void Plot()
         {
-            Matrix xValue = Matrix.RangeVector(0, 10);
-            Matrix yValue = Matrix.RangeVector(0, 10);
+            Matrix xValue = Matrix.RangeVector(1, 10);
+            Matrix yValue = Matrix.RangeVector(1, 10);
             this.Plot(xValue, yValue);
         }
         /// <summary>
-        ///         在AxisBox上由给出x、y坐标画出曲线
+        /// 在AxisBox上由给出x、y坐标画出曲线
         /// </summary>
         /// <param name="x">x行向量</param>
         /// <param name="y">y行向量</param>
@@ -670,10 +768,52 @@ namespace AxisBox
             this.XToLinear();//默认线性坐标
             this.YToLinear();
             this.getReorderedVersion();//为了提高鼠标移动捕捉点的效率,需要获得重新排列后的坐标点,方便查找
+            if (!refit)
+            {
+                xValRepository.RemoveRange(0, xValRepository.Count);
+                yValRepository.RemoveRange(0, yValRepository.Count);
+                for (int i = 0; i < xValReorder.Count; i++)
+                {
+                    xValRepository.Add(new Matrix(xValReorder.ElementAt(i)));
+                    yValRepository.Add(new Matrix(yValReorder.ElementAt(i)));
+                }
+            }
             refreshParameter();
+            #region 激活右键菜单相应功能
+            fitToolStripMenuItem.Enabled = true;
+            removeAllFncToolStripMenuItem.Enabled = true;
+            gridOnToolStripMenuItem.Enabled = true;
+            holdOnToolStripMenuItem.Enabled = true;
+            discreteOnToolStripMenuItem.Enabled = true;
+            continuousOnToolStripMenuItem.Enabled = true;
+            captrueModeToolStripMenuItem.Enabled = true;
+            titleOnToolStripMenuItem.Enabled = true;
+            xAxisOnToolStripMenuItem.Enabled = true;
+            yAxisOnToolStripMenuItem.Enabled = true;
+            xLogToolStripMenuItem.Enabled = true;
+            yLogToolStripMenuItem.Enabled = true;
+            xLabelOnToolStripMenuItem.Enabled = true;
+            yLabelOnToolStripMenuItem.Enabled = true;
+            xTickLabelOnToolStripMenuItem.Enabled = true;
+            yTickLabelOnToolStripMenuItem.Enabled = true;
+            xTickOnToolStripMenuItem.Enabled = true;
+            yTickOnToolStripMenuItem.Enabled = true;
+            darkThemeToolStripMenuItem.Enabled = true;
+            //拟合菜单项设置
+            for (int i = 0; i < fitTargetToolStripComboBox.Items.Count; i++)
+            {
+                fitTargetToolStripComboBox.Items.RemoveAt(0);
+            }
+            for (int i = 0; i < xVal.Count; i++)
+            {
+                fitTargetToolStripComboBox.Items.Add(i.ToString());
+            }
+            fitTimesToolStripComboBox.SelectedIndex = 0;
+            fitTargetToolStripComboBox.SelectedIndex = 0;
+            #endregion
         }
         /// <summary>
-        ///         在AxisBox上由给出x、y坐标画出曲线
+        /// 在AxisBox上由给出x、y坐标画出曲线
         /// </summary>
         /// <param name="xArray">一维数组</param>
         /// <param name="yArray">一维数组</param>
@@ -682,6 +822,105 @@ namespace AxisBox
             Matrix x = new Matrix(xArray);
             Matrix y = new Matrix(yArray);
             this.Plot(x, y);
+        }
+        /// <summary>
+        /// 移去所有已画函数
+        /// </summary>
+        public void RemoveAllFnc()
+        {
+            xVal.RemoveRange(0, xVal.Count);
+            yVal.RemoveRange(0, yVal.Count);
+            xValReorder.RemoveRange(0, xValReorder.Count);
+            yValReorder.RemoveRange(0, yValReorder.Count);
+            xValRepository.RemoveRange(0, xValRepository.Count);
+            yValRepository.RemoveRange(0, yValRepository.Count);
+            isPlotted = false;
+            refreshParameter();
+        }
+        /// <summary>
+        /// 拟合曲线
+        /// 如果要画多曲线需要先把所有曲线画出来然后再拟合;
+        /// 每条曲线拟合一次,不要对已经拟合过的曲线再次拟合,否则可能有不可预知错误
+        /// </summary>
+        /// <param name="index">拟合的是第几组数据(默认是第一组)</param>
+        /// <returns></returns>
+        public bool Fit(int index = 0)
+        {
+            if (fitTimes <= 0)
+                return false;
+            if (fitTimes >= 3)
+                return false;
+            if (index < 0 || index >= xVal.Count)
+                return false;
+            if (index < 0 || index >= phisicsXRepository.Count)
+                return false;
+            refit = true;//表示已经被重新拟合过了
+            double xMinTemp = xValReorder.ElementAt(index)[0, 0];
+            double xMaxTemp = xValReorder.ElementAt(index)[0, xValReorder.ElementAt(index).Columns - 1];
+            double increment = Math.Pow(10, Math.Round(Math.Log10(xMaxTemp - xMinTemp), MidpointRounding.AwayFromZero) - 3);
+            #region 一次拟合
+            //其实是线性回归
+            if (fitTimes == 1)
+            {
+                if (xVal.ElementAt(index).Columns < 2)//一次拟合起码要有两个点
+                    return false;
+                Matrix xToReplace = Matrix.RangeVector(xValReorder.ElementAt(index)[0, 0], increment,
+                                     xValReorder.ElementAt(index)[0, xValReorder.ElementAt(index).Columns - 1]);
+                Matrix curvePara = LinearFit(index);
+                Matrix yToReplace = curvePara[0, 1] * xToReplace + curvePara[0, 0];
+                xVal[index] = xToReplace;
+                yVal[index] = yToReplace;
+                getReorderedVersion();
+                refreshParameter();
+            }
+            #endregion
+            #region 非常规二次拟合部分
+            //其实更类似三次拟合,因为二次函数的参数都根据各阶段自变量来调整过了
+            else
+            {
+                if (xVal.ElementAt(index).Columns < 3)//二次拟合起码要有三个点
+                    return false;
+                Matrix curvePara = this.SquareFit(index);
+                Matrix xToReplace = null;
+                Matrix yToReplace = null;
+                for (int i = 0; i < xValReorder.ElementAt(index).Columns - 1; i++)
+                {
+                    Matrix xPhaseTemp = Matrix.RangeVector(xValReorder.ElementAt(index)[0, i], 
+                                                            increment, xValReorder.ElementAt(index)[0, i + 1]);
+                    Matrix yPhaseTemp;
+                    if (i == 0)
+                    {
+                        yPhaseTemp = curvePara[i, 0] * Matrix.Pow(xPhaseTemp, 2) + 
+                                        curvePara[i, 1] * xPhaseTemp + curvePara[i, 2];
+                    }
+                    else if (i == xValReorder.ElementAt(index).Columns - 2)
+                    {
+                        yPhaseTemp = curvePara[i - 1, 0] * Matrix.Pow(xPhaseTemp, 2) +
+                                        curvePara[i - 1, 1] * xPhaseTemp + curvePara[i - 1, 2];
+                    }
+                    else
+                    {
+                        Matrix ratioLeft;
+                        Matrix ratioRight;
+                        ratioLeft = (xValReorder.ElementAt(index)[0, i + 1] - xPhaseTemp) /
+                                        (xValReorder.ElementAt(index)[0, i + 1] - xValReorder.ElementAt(index)[0, i]);
+                        ratioRight = 1 - ratioLeft;
+                        Matrix paraA = curvePara[i - 1, 0] * ratioLeft + curvePara[i, 0] * ratioRight;
+                        Matrix paraB = curvePara[i - 1, 1] * ratioLeft + curvePara[i, 1] * ratioRight;
+                        Matrix paraC = curvePara[i - 1, 2] * ratioLeft + curvePara[i, 2] * ratioRight;
+                        yPhaseTemp = Matrix.DotMultiple(paraA, Matrix.Pow(xPhaseTemp, 2)) +
+                                                Matrix.DotMultiple(paraB, xPhaseTemp) + paraC;
+                    }
+                    xToReplace = Matrix.ConcatenateByRow(xToReplace, xPhaseTemp);
+                    yToReplace = Matrix.ConcatenateByRow(yToReplace, yPhaseTemp);
+                }
+                xVal[index] = xToReplace;
+                yVal[index] = yToReplace;
+                getReorderedVersion();
+                refreshParameter();
+            }
+            #endregion
+            return true;
         }
         #endregion
 
@@ -858,6 +1097,16 @@ namespace AxisBox
             {
                 xMax = xMax - xStep;
             }
+            if ((xMax - xMin) / xStep < 4)
+                xStep = xStep / 10;
+            while (xMin <= (xMinReal - xStep))
+            {
+                xMin = xMin + xStep;
+            }
+            while (xMax >= (xMaxReal + xStep))
+            {
+                xMax = xMax - xStep;
+            }
             originX = xMin;
         }
         private void YToLog()
@@ -887,6 +1136,16 @@ namespace AxisBox
             }
             double yRange = yMax - yMin;
             yStep = Math.Pow(10, Math.Round(Math.Log10(yRange / 10), MidpointRounding.AwayFromZero));
+            while (yMin <= (yMinReal - yStep))
+            {
+                yMin = yMin + yStep;
+            }
+            while (yMax >= (yMaxReal + yStep))
+            {
+                yMax = yMax - yStep;
+            }
+            if ((yMax - yMin) / yStep < 4)
+                yStep = yStep / 10;
             while (yMin <= (yMinReal - yStep))
             {
                 yMin = yMin + yStep;
@@ -946,6 +1205,16 @@ namespace AxisBox
             {
                 xMax = xMax - xStep;
             }
+            if ((xMax - xMin) / xStep < 4)
+                xStep = xStep / 10;
+            while (xMin <= (xMinReal - xStep))
+            {
+                xMin = xMin + xStep;
+            }
+            while (xMax >= (xMaxReal + xStep))
+            {
+                xMax = xMax - xStep;
+            }
             originX = xMin;
         }
         private void YToLinear()
@@ -989,11 +1258,16 @@ namespace AxisBox
             }
             double yRange = yMax - yMin;
             yStep = Math.Pow(10, Math.Round(Math.Log10(yRange / 10), MidpointRounding.AwayFromZero));
-            while ((yMax - yMin) / yStep <= 4)
+            while (yMin <= (yMinReal - yStep))
             {
-                yStep = (yMax - yMin) / 8;
-                yStep = Math.Pow(10, Math.Round(yStep));
+                yMin = yMin + yStep;
             }
+            while (yMax >= (yMaxReal + yStep))
+            {
+                yMax = yMax - yStep;
+            }
+            if ((yMax - yMin) / yStep < 4)
+                yStep = yStep / 10;
             while (yMin <= (yMinReal - yStep))
             {
                 yMin = yMin + yStep;
@@ -1027,9 +1301,265 @@ namespace AxisBox
                 phisicsXReorder.Add(this.ToPhysicsX(xValReorder.ElementAt(i)));
                 phisicsYReorder.Add(this.ToPhysicsY(yValReorder.ElementAt(i)));
             }
+            //保留源数据点的物理坐标
+            phisicsXRepository.RemoveRange(0, phisicsXRepository.Count);
+            phisicsYRepository.RemoveRange(0, phisicsYRepository.Count);
+            for (int i = 0; i < xValRepository.Count; i++)
+            {
+                phisicsXRepository.Add(this.ToPhysicsX(xValRepository.ElementAt(i)));
+                phisicsYRepository.Add(this.ToPhysicsY(yValRepository.ElementAt(i)));
+            }
             //物理坐标原点重置
             originPoint = new Point((int)this.ToPhysicsX(originX), (int)this.ToPhysicsY(originY));
             Invalidate();//窗口刷新
+        }
+        private Matrix LinearFit(int index)
+        {
+            //辅助一次拟合函数,返回系数a,b
+            double a, b;
+            b = (Matrix.SumVector(Matrix.DotMultiple(xVal.ElementAt(index), yVal.ElementAt(index))) -
+                Matrix.SumVector(xVal.ElementAt(index)) * Matrix.SumVector(yVal.ElementAt(index)) / 
+                xVal.ElementAt(index).Columns);
+            b = b / (Matrix.SumVector(Matrix.Pow(xVal.ElementAt(index), 2)) -
+                Math.Pow(Matrix.SumVector(xVal.ElementAt(index)), 2) / xVal.ElementAt(index).Columns);
+            a = Matrix.SumVector(yVal.ElementAt(index)) / yVal.ElementAt(index).Columns -
+                b * Matrix.SumVector(xVal.ElementAt(index)) / xVal.ElementAt(index).Columns;
+            return new Matrix(new double[2] { a, b });
+        }
+        private Matrix SquareFit(int index)
+        {
+            //辅助抛物线拟合函数,返回系数a,b,c
+            Matrix result = Matrix.Zeros(xVal.ElementAt(index).Columns - 2, 3);
+            for (int i = 0; i < result.Rows; i++)
+            {
+                Matrix xPoint_Temp = new Matrix(new double[3] { xVal.ElementAt(index)[0, i], 
+                                        xVal.ElementAt(index)[0, i + 1], xVal.ElementAt(index)[0, i + 2] });
+                xPoint_Temp = Matrix.Transfer(xPoint_Temp);
+                Matrix yPoint_Temp = new Matrix(new double[3] { yVal.ElementAt(index)[0, i],
+                                        yVal.ElementAt(index)[0, i + 1], yVal.ElementAt(index)[0, i + 2] });
+                yPoint_Temp = Matrix.Transfer(yPoint_Temp);
+                result = Matrix.SetMatrixRow(result, i, Matrix.Transfer(Matrix.FitCurve(xPoint_Temp, yPoint_Temp)));
+            }
+            return result;
+        }
+        #endregion
+
+        #region 右键菜单响应
+
+        private void plotDefaultToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.Plot();
+        }
+
+        private void plotDefineToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void fitActionToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FitTimes = fitTimesToolStripComboBox.SelectedIndex + 1;
+            this.Fit(fitTargetToolStripComboBox.SelectedIndex);
+        }
+
+        private void removeAllFncToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            RemoveAllFnc();
+            #region 使右键菜单相应功能失效
+            fitToolStripMenuItem.Enabled = false;
+            removeAllFncToolStripMenuItem.Enabled = false;
+            gridOnToolStripMenuItem.Enabled = false;
+            holdOnToolStripMenuItem.Enabled = false;
+            discreteOnToolStripMenuItem.Enabled = false;
+            continuousOnToolStripMenuItem.Enabled = false;
+            captrueModeToolStripMenuItem.Enabled = false;
+            titleOnToolStripMenuItem.Enabled = false;
+            xAxisOnToolStripMenuItem.Enabled = false;
+            yAxisOnToolStripMenuItem.Enabled = false;
+            xLogToolStripMenuItem.Enabled = false;
+            yLogToolStripMenuItem.Enabled = false;
+            xLabelOnToolStripMenuItem.Enabled = false;
+            yLabelOnToolStripMenuItem.Enabled = false;
+            xTickLabelOnToolStripMenuItem.Enabled = false;
+            yTickLabelOnToolStripMenuItem.Enabled = false;
+            xTickOnToolStripMenuItem.Enabled = false;
+            yTickOnToolStripMenuItem.Enabled = false;
+            darkThemeToolStripMenuItem.Enabled = false;
+            #endregion
+        }
+
+        private void gridOnToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            GridOn = !GridOn;
+            gridOnToolStripMenuItem.Checked = GridOn;
+        }
+
+        private void holdOnToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            HoldOn = !HoldOn;
+            holdOnToolStripMenuItem.Checked = HoldOn;
+        }
+
+        private void discreteOnToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            DiscreteOn = !DiscreteOn;
+            discreteOnToolStripMenuItem.Checked = DiscreteOn;
+        }
+
+        private void continuousOnToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ContinuousOn = !ContinuousOn;
+            continuousOnToolStripMenuItem.Checked = ContinuousOn;
+        }
+
+        private void captrueModeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CaptureMode = !CaptureMode;
+            captrueModeToolStripMenuItem.Checked = CaptureMode;
+        }
+
+        private void titleOnToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            TitleOn = !TitleOn;
+            titleOnToolStripMenuItem.Checked = TitleOn;
+        }
+
+        private void xAxisOnToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            XAxisOn = !XAxisOn;
+            xAxisOnToolStripMenuItem.Checked = XAxisOn;
+        }
+
+        private void yAxisOnToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            YAxisOn = !YAxisOn;
+            yAxisOnToolStripMenuItem.Checked = YAxisOn;
+        }
+
+        private void xLogToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            XLog = !XLog;
+            xLogToolStripMenuItem.Checked = XLog;
+        }
+
+        private void yLogToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            YLog = !YLog;
+            yLogToolStripMenuItem.Checked = YLog;
+        }
+
+        private void xLabelOnToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            XLabelOn = !XLabelOn;
+            xLabelOnToolStripMenuItem.Checked = XLabelOn;
+        }
+
+        private void yLabelOnToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            YLabelOn = !YLabelOn;
+            yLabelOnToolStripMenuItem.Checked = YLabelOn;
+        }
+
+        private void xTickOnToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            XTickOn = !XTickOn;
+            xTickOnToolStripMenuItem.Checked = XTickOn;
+        }
+
+        private void yTickOnToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            YTickOn = !YTickOn;
+            yTickOnToolStripMenuItem.Checked = YTickOn;
+        }
+
+        private void xTickLabelOnToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            XTickLabelOn = !XTickLabelOn;
+            xTickLabelOnToolStripMenuItem.Checked = XTickLabelOn;
+        }
+
+        private void yTickLabelOnToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            YTickLabelOn = !YTickLabelOn;
+            yTickLabelOnToolStripMenuItem.Checked = YTickLabelOn;
+        }
+
+        private void darkThemeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            DarkTheme = !DarkTheme;
+            darkThemeToolStripMenuItem.Checked = DarkTheme;
+        }
+
+        private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SettingForm settings = new SettingForm();
+            #region 设置对话框中的初始值
+            settings.titleTextBox.Text = PlotTitle;
+            settings.xLabelTextBox.Text = XLabel;
+            settings.yLabelTextBox.Text = YLabel;
+            settings.titleTrackBar.Value = PlotTitleSize;
+            settings.xLabelSizeTrackBar.Value = XLabelSize;
+            settings.yLabelSizeTrackBar.Value = YLabelSize;
+
+            settings.borderColor = BorderColor;
+            settings.background = BackgroundColor;
+            settings.axisAndLabelColor = AxisAndLabelColor;
+            settings.curveColor = CurveColor;
+            settings.discretePointColor = SamplePointColor;
+            settings.colorDesComboBox.SelectedIndex = 0;
+            settings.colorSetPanel.BackColor = BorderColor;
+
+            settings.xMinTextBox.Text = XMin.ToString();
+            settings.xMaxTextBox.Text = XMax.ToString();
+            settings.xStepTextBox.Text = XStep.ToString();
+            settings.yMinTextBox.Text = YMin.ToString();
+            settings.yMaxTextBox.Text = YMax.ToString();
+            settings.yStepTextBox.Text = YStep.ToString();
+            settings.curveDashStyle = CurveDashStyle;
+            settings.initializeCurveSelection();
+            #endregion
+            #region 根据对话框设置属性值
+            if (settings.ShowDialog() == DialogResult.OK)
+            {
+                PlotTitle = settings.titleTextBox.Text;
+                XLabel = settings.xLabelTextBox.Text;
+                YLabel = settings.yLabelTextBox.Text;
+                PlotTitleSize = settings.titleTrackBar.Value;
+                XLabelSize = settings.xLabelSizeTrackBar.Value;
+                YLabelSize = settings.yLabelSizeTrackBar.Value;
+                BorderColor = settings.borderColor;
+                BackgroundColor = settings.background;
+                AxisAndLabelColor = settings.axisAndLabelColor;
+                CurveColor = settings.curveColor;
+                SamplePointColor = settings.discretePointColor;
+
+                if (settings.xMinTextBox.Text != "")
+                {
+                    XMin = Convert.ToDouble(settings.xMinTextBox.Text);
+                }
+                if (settings.xMaxTextBox.Text != "")
+                {
+                    XMax = Convert.ToDouble(settings.xMaxTextBox.Text);
+                }
+                if (settings.xStepTextBox.Text != "")
+                {
+                    XStep = Convert.ToDouble(settings.xStepTextBox.Text);
+                }
+                if (settings.yMinTextBox.Text != "")
+                {
+                    YMin = Convert.ToDouble(settings.yMinTextBox.Text);
+                }
+                if (settings.yMaxTextBox.Text != "")
+                {
+                    YMax = Convert.ToDouble(settings.yMaxTextBox.Text);
+                }
+                if (settings.yStepTextBox.Text != "")
+                {
+                    YStep = Convert.ToDouble(settings.yStepTextBox.Text);
+                }
+                CurveDashStyle = settings.curveDashStyle;
+            }
+            #endregion
         }
         #endregion
 
@@ -1039,7 +1569,7 @@ namespace AxisBox
             {
                 //画背景
                 Graphics g = e.Graphics;
-                SolidBrush backgroundBrush = new SolidBrush(boardColor);
+                SolidBrush backgroundBrush = new SolidBrush(borderColor);
                 g.FillRectangle(backgroundBrush, new Rectangle(0, 0, this.Width, this.Height));
                 backgroundBrush = new SolidBrush(backgroundColor);
                 g.FillRectangle(backgroundBrush, plotArea);
@@ -1186,16 +1716,53 @@ namespace AxisBox
                 }
                 #endregion
                 #region 画函数
-                if (phisicsX.Count != 0)
+                if (phisicsX.Count != 0)//有数据点才画函数图
                 {
-                    Pen funcPen = new Pen(this.lineColor, 1);
-                    funcPen.DashStyle = lineDashStyle;
-                    for (int i = 0; i < phisicsX.Count; i++)
+                    if (continuousOn)//是否画出连续曲线
                     {
-                        for (int j = 0; j < phisicsX.ElementAt(i).Columns - 1; j++)
+                        Pen funcPen = new Pen(this.lineColor, 1);
+                        funcPen.DashStyle = lineDashStyle;
+                        for (int i = 0; i < phisicsX.Count; i++)
                         {
-                            g.DrawLine(funcPen, (int)phisicsX.ElementAt(i)[0, j], (int)phisicsY.ElementAt(i)[0, j],
-                                            (int)phisicsX.ElementAt(i)[0, j + 1], (int)phisicsY.ElementAt(i)[0, j + 1]);
+                            for (int j = 0; j < phisicsX.ElementAt(i).Columns - 1; j++)
+                            {
+                                if (xVal.ElementAt(i)[0, j] >= xMin && xVal.ElementAt(i)[0, j + 1] <= xMax &&
+                                    yVal.ElementAt(i)[0, j] >= yMin && yVal.ElementAt(i)[0, j + 1] <= yMax)
+                                {
+                                    g.DrawLine(funcPen, (int)phisicsX.ElementAt(i)[0, j], (int)phisicsY.ElementAt(i)[0, j],
+                                        (int)phisicsX.ElementAt(i)[0, j + 1], (int)phisicsY.ElementAt(i)[0, j + 1]);
+                                }
+                            }
+                        } 
+                    }
+                    if (discreteOn)//是否画出离散点
+                    {
+                        if (!refit)//未重新拟合
+                        {
+                            SolidBrush sampleBrush = new SolidBrush(samplePointColor);
+                            for (int i = 0; i < phisicsX.Count; i++)
+                            {
+                                for (int j = 0; j < phisicsX.ElementAt(i).Columns; j++)
+                                {
+                                    g.FillEllipse(sampleBrush, (int)phisicsX.ElementAt(i)[0, j] - radiusOfSamplePoint,
+                                                    (int)phisicsY.ElementAt(i)[0, j] - radiusOfSamplePoint,
+                                                    2 * radiusOfSamplePoint, 2 * radiusOfSamplePoint);
+                                }
+                            }
+                        }
+                        else//重新拟合过
+                        {
+                            SolidBrush sampleBrush = new SolidBrush(samplePointColor);
+                            for (int i = 0; i < phisicsXRepository.Count; i++)
+                            {
+                                for (int j = 0; j < phisicsXRepository.ElementAt(i).Columns; j++)
+                                {
+                                    g.FillEllipse(sampleBrush, 
+                                                    (int)phisicsXRepository.ElementAt(i)[0, j] - radiusOfSamplePoint,
+                                                    (int)phisicsYRepository.ElementAt(i)[0, j] - radiusOfSamplePoint,
+                                                    2 * radiusOfSamplePoint, 2 * radiusOfSamplePoint);
+                                }
+                            }
                         }
                     }
                 }

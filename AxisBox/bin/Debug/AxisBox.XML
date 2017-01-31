@@ -272,6 +272,11 @@
             是否使用控件自带右键菜单
             </summary>
         </member>
+        <member name="P:AxisBox.AxisBox.AxisEqual">
+            <summary>
+            是否横纵坐标等比例
+            </summary>
+        </member>
         <member name="P:AxisBox.AxisBox.XLabel">
             <summary>
             x轴标签内容

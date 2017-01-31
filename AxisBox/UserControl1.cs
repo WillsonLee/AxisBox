@@ -35,6 +35,7 @@ namespace AxisBox
         private bool yTickLabelOn = true;
         private bool continuousOn = true;
         private bool discreteOn = false;
+        private bool axisEqual = false;//刻度等比例
         private bool refit = false;//是否把数据点重新拟合过
         private bool captureMode = true;//捕捉状态
         private bool capture = false;//是否捕捉到点
@@ -84,6 +85,12 @@ namespace AxisBox
         private double yMax;
         private double originX;
         private double originY;
+        private double xMinRepository;
+        private double xMaxRepository;
+        private double yMinRepository;
+        private double yMaxRepository;
+        private double xStepRepository;
+        private double yStepRepository;
         #endregion
 
         #region 访问器
@@ -99,6 +106,23 @@ namespace AxisBox
                 if (isPlotted)
                 {
                     xAxis = value;
+                    xAxisOnToolStripMenuItem.Checked = XAxisOn;//右键菜单处理
+                    if (XAxisOn)
+                    {
+                        xTickOnToolStripMenuItem.Enabled = true;
+                    }
+                    else
+                    {
+                        xTickOnToolStripMenuItem.Enabled = false;
+                    }
+                    if (XAxisOn && XTickOn)
+                    {
+                        xTickLabelOnToolStripMenuItem.Enabled = true;
+                    }
+                    else
+                    {
+                        xTickLabelOnToolStripMenuItem.Enabled = false;
+                    }
                     Invalidate(); 
                 }
             }
@@ -114,6 +138,17 @@ namespace AxisBox
                 if (isPlotted)
                 {
                     yAxis = value;
+                    yAxisOnToolStripMenuItem.Checked = YAxisOn;//右键菜单处理
+                    if (!yAxisOnToolStripMenuItem.Checked)
+                    {
+                        yTickOnToolStripMenuItem.Enabled = false;
+                        yTickLabelOnToolStripMenuItem.Enabled = false;
+                    }
+                    else
+                    {
+                        yTickOnToolStripMenuItem.Enabled = true;
+                        yTickLabelOnToolStripMenuItem.Enabled = true;
+                    }
                     Invalidate(); 
                 }
             }
@@ -150,7 +185,8 @@ namespace AxisBox
                             this.refreshParameter();
                             Invalidate(); 
                         }
-                    } 
+                    }
+                    xLogToolStripMenuItem.Checked = XLog;//右键菜单处理
                 }
             }
         }
@@ -186,7 +222,8 @@ namespace AxisBox
                             this.refreshParameter();
                             Invalidate(); 
                         }
-                    } 
+                    }
+                    yLogToolStripMenuItem.Checked = YLog;
                 }
             }
         }
@@ -201,7 +238,8 @@ namespace AxisBox
                 if (isPlotted)
                 {
                     gridOn = value;
-                    Invalidate(); 
+                    gridOnToolStripMenuItem.Checked = GridOn;//右键菜单处理
+                    Invalidate();
                 }
             }
         }
@@ -216,6 +254,7 @@ namespace AxisBox
                 if (isPlotted)
                 {
                     holdOn = value;
+                    holdOnToolStripMenuItem.Checked = HoldOn;
                     Invalidate(); 
                 }
             }
@@ -231,6 +270,7 @@ namespace AxisBox
                 if (isPlotted)
                 {
                     titleOn = value;
+                    titleOnToolStripMenuItem.Checked = TitleOn;
                     Invalidate(); 
                 }
             }
@@ -246,6 +286,7 @@ namespace AxisBox
                 if (isPlotted)
                 {
                     xLabelOn = value;
+                    xLabelOnToolStripMenuItem.Checked = XLabelOn;
                     Invalidate(); 
                 }
             }
@@ -261,6 +302,7 @@ namespace AxisBox
                 if (isPlotted)
                 {
                     yLabelOn = value;
+                    yLabelOnToolStripMenuItem.Checked = YLabelOn;
                     Invalidate(); 
                 }
             }
@@ -278,6 +320,15 @@ namespace AxisBox
                 {
                     Invalidate();
                 }
+                xTickOnToolStripMenuItem.Checked = XTickOn;//右键菜单处理
+                if (XTickOn && XAxisOn)
+                {
+                    xTickLabelOnToolStripMenuItem.Enabled = true;
+                }
+                else
+                {
+                    xTickLabelOnToolStripMenuItem.Enabled = false;
+                }
             }
         }
         /// <summary>
@@ -292,6 +343,15 @@ namespace AxisBox
                 if (isPlotted)
                 {
                     Invalidate();
+                }
+                yTickOnToolStripMenuItem.Checked = YTickOn;//右键菜单处理
+                if (YTickOn && YAxisOn)
+                {
+                    yTickLabelOnToolStripMenuItem.Enabled = true;
+                }
+                else
+                {
+                    yTickLabelOnToolStripMenuItem.Enabled = false;
                 }
             }
         }
@@ -308,6 +368,7 @@ namespace AxisBox
                 {
                     Invalidate();
                 }
+                xTickLabelOnToolStripMenuItem.Checked = XTickLabelOn;
             }
         }
         /// <summary>
@@ -323,6 +384,7 @@ namespace AxisBox
                 {
                     Invalidate();
                 }
+                yTickLabelOnToolStripMenuItem.Checked = YTickLabelOn;
             }
         }
         /// <summary>
@@ -336,6 +398,7 @@ namespace AxisBox
                 if (isPlotted)
                 {
                     captureMode = value;
+                    captrueModeToolStripMenuItem.Checked = CaptureMode;
                     Invalidate(); 
                 }
             }
@@ -365,6 +428,7 @@ namespace AxisBox
                 {
                     Invalidate();
                 }
+                darkThemeToolStripMenuItem.Checked = DarkTheme;
             }
         }
         /// <summary>
@@ -378,6 +442,7 @@ namespace AxisBox
                 if (isPlotted)
                 {
                     continuousOn = value;
+                    continuousOnToolStripMenuItem.Checked = ContinuousOn;
                     Invalidate(); 
                 }
             }
@@ -393,6 +458,7 @@ namespace AxisBox
                 if (isPlotted)
                 {
                     discreteOn = value;
+                    discreteOnToolStripMenuItem.Checked = DiscreteOn;
                     Invalidate(); 
                 }
             }
@@ -413,6 +479,66 @@ namespace AxisBox
                 else
                 {
                     ContextMenuStrip = null;
+                }
+            }
+        }
+        /// <summary>
+        /// 是否横纵坐标等比例
+        /// </summary>
+        public bool AxisEqual
+        {
+            get { return axisEqual; }
+            set
+            {
+                if (isPlotted)
+                {
+                    axisEqual = value;
+                    if (value)//等比例
+                    {
+                        if (!xLog)//线性坐标才可以使x、y等比例
+                        {
+                            double xRange = xMaxRepository - xMinRepository;
+                            double yRange = yMaxRepository - yMinRepository;
+                            double plotRatio = (double)plotArea.Width / plotArea.Height;
+                            if ((xRange / yRange) > plotRatio)
+                            {
+                                yRange = xRange / plotRatio;
+                                yMax = yMin + yRange;
+                                xStep = xStepRepository;
+                                yStep = xStepRepository;
+                            }
+                            else
+                            {
+                                xRange = yRange * plotRatio;
+                                xMax = xMin + xRange;
+                                xStep = yStepRepository;
+                                yStep = yStepRepository;
+                            }
+                            refreshParameter();
+                            Invalidate();
+                        }
+                    }
+                    else//非等比例
+                    {
+                        if (xLog)
+                        {
+                            XToLog();
+                        }
+                        else
+                        {
+                            XToLinear();
+                        }
+                        if (yLog)
+                        {
+                            YToLog();
+                        }
+                        else
+                        {
+                            YToLinear();
+                        }
+                        refreshParameter();
+                        Invalidate();
+                    } 
                 }
             }
         }
@@ -786,8 +912,28 @@ namespace AxisBox
                     yVal.Add(y);
                 }
             }
-            this.XToLinear();//默认线性坐标
-            this.YToLinear();
+            if (!xLog)
+            {
+                this.XToLinear();//默认线性坐标
+            }
+            else
+            {
+                this.XToLog();
+            }
+            if (!yLog)
+            {
+                this.YToLinear();
+            }
+            else
+            {
+                this.YToLog();
+            }
+            xMinRepository = xMin;
+            xMaxRepository = xMax;
+            yMinRepository = yMin;
+            yMaxRepository = yMax;
+            xStepRepository = xStep;
+            yStepRepository = yStep;
             this.getReorderedVersion();//为了提高鼠标移动捕捉点的效率,需要获得重新排列后的坐标点,方便查找
             if (!refit)
             {
@@ -858,6 +1004,29 @@ namespace AxisBox
             isPlotted = false;
             refit = false;
             refreshParameter();
+            #region 使右键菜单相应功能失效
+            fitToolStripMenuItem.Enabled = false;
+            removeAllFncToolStripMenuItem.Enabled = false;
+            gridOnToolStripMenuItem.Enabled = false;
+            holdOnToolStripMenuItem.Enabled = false;
+            discreteOnToolStripMenuItem.Enabled = false;
+            continuousOnToolStripMenuItem.Enabled = false;
+            captrueModeToolStripMenuItem.Enabled = false;
+            titleOnToolStripMenuItem.Enabled = false;
+            xAxisOnToolStripMenuItem.Enabled = false;
+            yAxisOnToolStripMenuItem.Enabled = false;
+            xLogToolStripMenuItem.Enabled = false;
+            yLogToolStripMenuItem.Enabled = false;
+            xLabelOnToolStripMenuItem.Enabled = false;
+            yLabelOnToolStripMenuItem.Enabled = false;
+            xTickLabelOnToolStripMenuItem.Enabled = false;
+            yTickLabelOnToolStripMenuItem.Enabled = false;
+            xTickOnToolStripMenuItem.Enabled = false;
+            yTickOnToolStripMenuItem.Enabled = false;
+            darkThemeToolStripMenuItem.Enabled = false;
+            #endregion
+            plotToolStripMenuItem.Enabled = true;
+            targetsBeenFitted.RemoveRange(0, targetsBeenFitted.Count);
         }
         /// <summary>
         /// 拟合曲线
@@ -942,6 +1111,14 @@ namespace AxisBox
                 refreshParameter();
             }
             #endregion
+            //关于右键菜单的处理
+            plotToolStripMenuItem.Enabled = false;
+            targetsBeenFitted.Add(index);
+            if (fitTargetToolStripComboBox.SelectedIndex==index)
+            {
+                fitActionToolStripMenuItem.Enabled = false; 
+            }
+            //finish
             return true;
         }
         #endregion
@@ -1394,139 +1571,96 @@ namespace AxisBox
         {
             FitTimes = fitTimesToolStripComboBox.SelectedIndex + 1;
             this.Fit(fitTargetToolStripComboBox.SelectedIndex);
-            plotToolStripMenuItem.Enabled = false;
-            targetsBeenFitted.Add(fitTargetToolStripComboBox.SelectedIndex);
-            fitActionToolStripMenuItem.Enabled = false;
         }
 
         private void removeAllFncToolStripMenuItem_Click(object sender, EventArgs e)
         {
             RemoveAllFnc();
-            #region 使右键菜单相应功能失效
-            fitToolStripMenuItem.Enabled = false;
-            removeAllFncToolStripMenuItem.Enabled = false;
-            gridOnToolStripMenuItem.Enabled = false;
-            holdOnToolStripMenuItem.Enabled = false;
-            discreteOnToolStripMenuItem.Enabled = false;
-            continuousOnToolStripMenuItem.Enabled = false;
-            captrueModeToolStripMenuItem.Enabled = false;
-            titleOnToolStripMenuItem.Enabled = false;
-            xAxisOnToolStripMenuItem.Enabled = false;
-            yAxisOnToolStripMenuItem.Enabled = false;
-            xLogToolStripMenuItem.Enabled = false;
-            yLogToolStripMenuItem.Enabled = false;
-            xLabelOnToolStripMenuItem.Enabled = false;
-            yLabelOnToolStripMenuItem.Enabled = false;
-            xTickLabelOnToolStripMenuItem.Enabled = false;
-            yTickLabelOnToolStripMenuItem.Enabled = false;
-            xTickOnToolStripMenuItem.Enabled = false;
-            yTickOnToolStripMenuItem.Enabled = false;
-            darkThemeToolStripMenuItem.Enabled = false;
-            #endregion
-            plotToolStripMenuItem.Enabled = true;
-            targetsBeenFitted.RemoveRange(0, targetsBeenFitted.Count);
         }
 
         private void gridOnToolStripMenuItem_Click(object sender, EventArgs e)
         {
             GridOn = !GridOn;
-            gridOnToolStripMenuItem.Checked = GridOn;
         }
 
         private void holdOnToolStripMenuItem_Click(object sender, EventArgs e)
         {
             HoldOn = !HoldOn;
-            holdOnToolStripMenuItem.Checked = HoldOn;
         }
 
         private void discreteOnToolStripMenuItem_Click(object sender, EventArgs e)
         {
             DiscreteOn = !DiscreteOn;
-            discreteOnToolStripMenuItem.Checked = DiscreteOn;
         }
 
         private void continuousOnToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ContinuousOn = !ContinuousOn;
-            continuousOnToolStripMenuItem.Checked = ContinuousOn;
         }
 
         private void captrueModeToolStripMenuItem_Click(object sender, EventArgs e)
         {
             CaptureMode = !CaptureMode;
-            captrueModeToolStripMenuItem.Checked = CaptureMode;
         }
 
         private void titleOnToolStripMenuItem_Click(object sender, EventArgs e)
         {
             TitleOn = !TitleOn;
-            titleOnToolStripMenuItem.Checked = TitleOn;
         }
 
         private void xAxisOnToolStripMenuItem_Click(object sender, EventArgs e)
         {
             XAxisOn = !XAxisOn;
-            xAxisOnToolStripMenuItem.Checked = XAxisOn;
         }
 
         private void yAxisOnToolStripMenuItem_Click(object sender, EventArgs e)
         {
             YAxisOn = !YAxisOn;
-            yAxisOnToolStripMenuItem.Checked = YAxisOn;
         }
 
         private void xLogToolStripMenuItem_Click(object sender, EventArgs e)
         {
             XLog = !XLog;
-            xLogToolStripMenuItem.Checked = XLog;
         }
 
         private void yLogToolStripMenuItem_Click(object sender, EventArgs e)
         {
             YLog = !YLog;
-            yLogToolStripMenuItem.Checked = YLog;
         }
 
         private void xLabelOnToolStripMenuItem_Click(object sender, EventArgs e)
         {
             XLabelOn = !XLabelOn;
-            xLabelOnToolStripMenuItem.Checked = XLabelOn;
         }
 
         private void yLabelOnToolStripMenuItem_Click(object sender, EventArgs e)
         {
             YLabelOn = !YLabelOn;
-            yLabelOnToolStripMenuItem.Checked = YLabelOn;
         }
 
         private void xTickOnToolStripMenuItem_Click(object sender, EventArgs e)
         {
             XTickOn = !XTickOn;
-            xTickOnToolStripMenuItem.Checked = XTickOn;
         }
 
         private void yTickOnToolStripMenuItem_Click(object sender, EventArgs e)
         {
             YTickOn = !YTickOn;
-            yTickOnToolStripMenuItem.Checked = YTickOn;
         }
 
         private void xTickLabelOnToolStripMenuItem_Click(object sender, EventArgs e)
         {
             XTickLabelOn = !XTickLabelOn;
-            xTickLabelOnToolStripMenuItem.Checked = XTickLabelOn;
         }
 
         private void yTickLabelOnToolStripMenuItem_Click(object sender, EventArgs e)
         {
             YTickLabelOn = !YTickLabelOn;
-            yTickLabelOnToolStripMenuItem.Checked = YTickLabelOn;
         }
 
         private void darkThemeToolStripMenuItem_Click(object sender, EventArgs e)
         {
             DarkTheme = !DarkTheme;
-            darkThemeToolStripMenuItem.Checked = DarkTheme;
         }
 
         private void settingsToolStripMenuItem_Click(object sender, EventArgs e)

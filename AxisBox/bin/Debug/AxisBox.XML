@@ -4,6 +4,23 @@
         <name>AxisBox</name>
     </assembly>
     <members>
+        <member name="F:AxisBox.GenerateXY.components">
+            <summary>
+            Required designer variable.
+            </summary>
+        </member>
+        <member name="M:AxisBox.GenerateXY.Dispose(System.Boolean)">
+            <summary>
+            Clean up any resources being used.
+            </summary>
+            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        </member>
+        <member name="M:AxisBox.GenerateXY.InitializeComponent">
+            <summary>
+            Required method for Designer support - do not modify
+            the contents of this method with the code editor.
+            </summary>
+        </member>
         <member name="T:AxisBox.Properties.Resources">
             <summary>
               一个强类型的资源类，用于查找本地化的字符串等。
@@ -151,6 +168,31 @@
             <param name="xArray">一维数组</param>
             <param name="yArray">一维数组</param>
         </member>
+        <member name="M:AxisBox.AxisBox.Plot(MatrixTool.Matrix,MatrixTool.Matrix,System.Drawing.Color)">
+            <summary>
+            在AxisBox上由给出x、y坐标画出曲线
+            </summary>
+            <param name="x">x行向量</param>
+            <param name="y">y行向量</param>
+            <param name="curveColor">曲线颜色</param>
+        </member>
+        <member name="M:AxisBox.AxisBox.Plot(MatrixTool.Matrix,MatrixTool.Matrix,System.Drawing.Drawing2D.DashStyle)">
+            <summary>
+            在AxisBox上由给出x、y坐标画出曲线
+            </summary>
+            <param name="x">x行向量</param>
+            <param name="y">y行向量</param>
+            <param name="curveStyle">曲线线型</param>
+        </member>
+        <member name="M:AxisBox.AxisBox.Plot(MatrixTool.Matrix,MatrixTool.Matrix,System.Drawing.Color,System.Drawing.Drawing2D.DashStyle)">
+            <summary>
+            在AxisBox上由给出x、y坐标画出曲线
+            </summary>
+            <param name="x">x行向量</param>
+            <param name="y">y行向量</param>
+            <param name="curveColor">曲线颜色</param>
+            <param name="curveStyle">曲线线型</param>
+        </member>
         <member name="M:AxisBox.AxisBox.RemoveAllFnc">
             <summary>
             移去所有已画函数
@@ -164,6 +206,20 @@
             </summary>
             <param name="index">拟合的是第几组数据(默认是第一组)</param>
             <returns></returns>
+        </member>
+        <member name="M:AxisBox.AxisBox.ChangeColor(System.Int32,System.Drawing.Color)">
+            <summary>
+            设置曲线颜色
+            </summary>
+            <param name="dstCurve">要设置的目标曲线序号</param>
+            <param name="colorToChange">要设置成的颜色</param>
+        </member>
+        <member name="M:AxisBox.AxisBox.ChangeLineStyle(System.Int32,System.Drawing.Drawing2D.DashStyle)">
+            <summary>
+            设置曲线线型
+            </summary>
+            <param name="dstCurve">要设置的目标曲线序号</param>
+            <param name="dashStyleToChange">要设置成的线型</param>
         </member>
         <member name="F:AxisBox.AxisBox.components">
             <summary>

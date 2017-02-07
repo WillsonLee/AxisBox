@@ -66,12 +66,19 @@
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.toolTip2 = new System.Windows.Forms.ToolTip(this.components);
             this.toolTip3 = new System.Windows.Forms.ToolTip(this.components);
+            this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.lineColorPanel = new System.Windows.Forms.Panel();
+            this.lineStyleComboBox = new System.Windows.Forms.ComboBox();
+            this.label13 = new System.Windows.Forms.Label();
+            this.indexComboBox = new System.Windows.Forms.ComboBox();
+            this.label12 = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.yLabelSizeTrackBar)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.xLabelSizeTrackBar)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.titleTrackBar)).BeginInit();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
+            this.groupBox4.SuspendLayout();
             this.SuspendLayout();
             // 
             // groupBox1
@@ -220,15 +227,15 @@
             this.groupBox2.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.groupBox2.Location = new System.Drawing.Point(12, 128);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(433, 78);
+            this.groupBox2.Size = new System.Drawing.Size(197, 78);
             this.groupBox2.TabIndex = 1;
             this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "颜色";
+            this.groupBox2.Text = "总体颜色";
             // 
             // colorSetPanel
             // 
             this.colorSetPanel.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.colorSetPanel.Location = new System.Drawing.Point(313, 13);
+            this.colorSetPanel.Location = new System.Drawing.Point(104, 13);
             this.colorSetPanel.Name = "colorSetPanel";
             this.colorSetPanel.Size = new System.Drawing.Size(81, 59);
             this.colorSetPanel.TabIndex = 1;
@@ -244,9 +251,9 @@
             "轴网及标签颜色",
             "曲线颜色",
             "离散点颜色"});
-            this.colorDesComboBox.Location = new System.Drawing.Point(87, 27);
+            this.colorDesComboBox.Location = new System.Drawing.Point(6, 27);
             this.colorDesComboBox.Name = "colorDesComboBox";
-            this.colorDesComboBox.Size = new System.Drawing.Size(121, 25);
+            this.colorDesComboBox.Size = new System.Drawing.Size(92, 25);
             this.colorDesComboBox.TabIndex = 0;
             this.colorDesComboBox.SelectedIndexChanged += new System.EventHandler(this.colorDesComboBox_SelectedIndexChanged);
             // 
@@ -275,7 +282,7 @@
             this.groupBox3.Size = new System.Drawing.Size(433, 158);
             this.groupBox3.TabIndex = 2;
             this.groupBox3.TabStop = false;
-            this.groupBox3.Text = "曲线";
+            this.groupBox3.Text = "总体线型及范围";
             // 
             // yStepTextBox
             // 
@@ -438,11 +445,74 @@
             this.dashRadioButton.UseVisualStyleBackColor = true;
             this.dashRadioButton.CheckedChanged += new System.EventHandler(this.dashRadioButton_CheckedChanged);
             // 
+            // groupBox4
+            // 
+            this.groupBox4.Controls.Add(this.lineColorPanel);
+            this.groupBox4.Controls.Add(this.lineStyleComboBox);
+            this.groupBox4.Controls.Add(this.label13);
+            this.groupBox4.Controls.Add(this.indexComboBox);
+            this.groupBox4.Controls.Add(this.label12);
+            this.groupBox4.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.groupBox4.Location = new System.Drawing.Point(215, 128);
+            this.groupBox4.Name = "groupBox4";
+            this.groupBox4.Size = new System.Drawing.Size(230, 78);
+            this.groupBox4.TabIndex = 3;
+            this.groupBox4.TabStop = false;
+            this.groupBox4.Text = "曲线设置";
+            // 
+            // lineColorPanel
+            // 
+            this.lineColorPanel.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.lineColorPanel.Location = new System.Drawing.Point(152, 13);
+            this.lineColorPanel.Name = "lineColorPanel";
+            this.lineColorPanel.Size = new System.Drawing.Size(72, 59);
+            this.lineColorPanel.TabIndex = 13;
+            this.lineColorPanel.Click += new System.EventHandler(this.lineColorPanel_Click);
+            // 
+            // lineStyleComboBox
+            // 
+            this.lineStyleComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.lineStyleComboBox.FormattingEnabled = true;
+            this.lineStyleComboBox.Location = new System.Drawing.Point(68, 47);
+            this.lineStyleComboBox.Name = "lineStyleComboBox";
+            this.lineStyleComboBox.Size = new System.Drawing.Size(78, 25);
+            this.lineStyleComboBox.TabIndex = 12;
+            this.lineStyleComboBox.SelectedIndexChanged += new System.EventHandler(this.lineStyleComboBox_SelectedIndexChanged);
+            // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.Location = new System.Drawing.Point(5, 50);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(35, 17);
+            this.label13.TabIndex = 11;
+            this.label13.Text = "线型:";
+            // 
+            // indexComboBox
+            // 
+            this.indexComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.indexComboBox.FormattingEnabled = true;
+            this.indexComboBox.Location = new System.Drawing.Point(68, 17);
+            this.indexComboBox.Name = "indexComboBox";
+            this.indexComboBox.Size = new System.Drawing.Size(78, 25);
+            this.indexComboBox.TabIndex = 10;
+            this.indexComboBox.SelectedIndexChanged += new System.EventHandler(this.indexComboBox_SelectedIndexChanged);
+            // 
+            // label12
+            // 
+            this.label12.AutoSize = true;
+            this.label12.Location = new System.Drawing.Point(5, 23);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(59, 17);
+            this.label12.TabIndex = 9;
+            this.label12.Text = "曲线序号:";
+            // 
             // SettingForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(457, 380);
+            this.Controls.Add(this.groupBox4);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
@@ -460,6 +530,8 @@
             this.groupBox2.ResumeLayout(false);
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
+            this.groupBox4.ResumeLayout(false);
+            this.groupBox4.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -527,5 +599,11 @@
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.GroupBox groupBox4;
+        public System.Windows.Forms.Panel lineColorPanel;
+        public System.Windows.Forms.ComboBox lineStyleComboBox;
+        private System.Windows.Forms.Label label13;
+        public System.Windows.Forms.ComboBox indexComboBox;
+        private System.Windows.Forms.Label label12;
     }
 }

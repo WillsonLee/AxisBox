@@ -56,10 +56,12 @@ namespace AxisBox
         private Color backgroundColor = Color.White;//背景颜色
         private Color axisAndLabelColor = Color.Black;//坐标线及标签文本颜色
         private Color lineColor = Color.Blue;//默认图线颜色
+        private List<Color> lineColorList = new List<Color>();//图线颜色列表
         private Color samplePointColor = Color.Blue;//默认离散数据点颜色
         private int radiusOfSamplePoint = 4;//默认离散点半径(大小)
         private int fitTimes = 1;//拟合次数
         private System.Drawing.Drawing2D.DashStyle lineDashStyle =System.Drawing.Drawing2D.DashStyle.Solid;//默认为实线
+        private List<System.Drawing.Drawing2D.DashStyle> lineDashStyleList = new List<System.Drawing.Drawing2D.DashStyle>();
         private List<Matrix> phisicsX = new List<Matrix>();
         private List<Matrix> phisicsY = new List<Matrix>();
         private List<Matrix> phisicsXReorder = new List<Matrix>();
@@ -68,7 +70,7 @@ namespace AxisBox
         private List<Matrix> phisicsYRepository = new List<Matrix>();//用这两个来保存源数据点的数据
         private Point capturePoint = new Point(0, 0);
         private PointF capturePointActual = new PointF(0, 0);
-        private int sensitivity = 30;//表示捕捉点的敏感度,默认为半径20像素以内
+        private int sensitivity = 30;//表示捕捉点的敏感度,默认为半径30像素以内
         private List<int> targetsBeenFitted = new List<int>();//表示哪些曲线已经被拟合过了
         //绘图数据
         private List<Matrix> xVal = new List<Matrix>();
@@ -892,10 +894,22 @@ namespace AxisBox
         public void Plot(Matrix x, Matrix y)
         {
             isPlotted = true;
+            System.Drawing.Drawing2D.DashStyle dashTemp;
+            switch (lineDashStyle)
+            {
+                case System.Drawing.Drawing2D.DashStyle.Dash: dashTemp = System.Drawing.Drawing2D.DashStyle.Dash; break;
+                case System.Drawing.Drawing2D.DashStyle.DashDot: dashTemp = System.Drawing.Drawing2D.DashStyle.DashDot; break;
+                case System.Drawing.Drawing2D.DashStyle.DashDotDot: dashTemp = System.Drawing.Drawing2D.DashStyle.DashDotDot; break;
+                case System.Drawing.Drawing2D.DashStyle.Dot: dashTemp = System.Drawing.Drawing2D.DashStyle.Dot; break;
+                case System.Drawing.Drawing2D.DashStyle.Solid: dashTemp = System.Drawing.Drawing2D.DashStyle.Solid; break;
+                default: dashTemp = System.Drawing.Drawing2D.DashStyle.Solid; break;
+            }
             if (holdOn)//是否追加画图还是覆盖画图
             {
                 xVal.Add(x);
                 yVal.Add(y);
+                lineColorList.Add(Color.FromArgb(lineColor.ToArgb()));
+                lineDashStyleList.Add(dashTemp);
             }
             else
             {
@@ -903,13 +917,19 @@ namespace AxisBox
                 {
                     xVal.Add(x);
                     yVal.Add(y);
+                    lineColorList.Add(Color.FromArgb(lineColor.ToArgb()));
+                    lineDashStyleList.Add(dashTemp);
                 }
                 else
                 {
                     xVal.RemoveRange(0, xVal.Count);
                     yVal.RemoveRange(0, yVal.Count);
+                    lineColorList.RemoveRange(0, lineColorList.Count);
+                    lineDashStyleList.RemoveRange(0, lineDashStyleList.Count);
                     xVal.Add(x);
                     yVal.Add(y);
+                    lineColorList.Add(Color.FromArgb(lineColor.ToArgb()));
+                    lineDashStyleList.Add(dashTemp);
                 }
             }
             if (!xLog)
@@ -967,7 +987,8 @@ namespace AxisBox
             yTickOnToolStripMenuItem.Enabled = true;
             darkThemeToolStripMenuItem.Enabled = true;
             //拟合菜单项设置
-            for (int i = 0; i < fitTargetToolStripComboBox.Items.Count; i++)
+            int fitTargetItemsCount=fitTargetToolStripComboBox.Items.Count;
+            for (int i = 0; i < fitTargetItemsCount; i++)
             {
                 fitTargetToolStripComboBox.Items.RemoveAt(0);
             }
@@ -991,6 +1012,41 @@ namespace AxisBox
             this.Plot(x, y);
         }
         /// <summary>
+        /// 在AxisBox上由给出x、y坐标画出曲线
+        /// </summary>
+        /// <param name="x">x行向量</param>
+        /// <param name="y">y行向量</param>
+        /// <param name="curveColor">曲线颜色</param>
+        public void Plot(Matrix x, Matrix y, Color curveColor)
+        {
+            this.Plot(x, y);
+            this.ChangeColor(xVal.Count - 1, curveColor);
+        }
+        /// <summary>
+        /// 在AxisBox上由给出x、y坐标画出曲线
+        /// </summary>
+        /// <param name="x">x行向量</param>
+        /// <param name="y">y行向量</param>
+        /// <param name="curveStyle">曲线线型</param>
+        public void Plot(Matrix x, Matrix y, System.Drawing.Drawing2D.DashStyle curveStyle)
+        {
+            this.Plot(x, y);
+            this.ChangeLineStyle(xVal.Count - 1, curveStyle);
+        }
+        /// <summary>
+        /// 在AxisBox上由给出x、y坐标画出曲线
+        /// </summary>
+        /// <param name="x">x行向量</param>
+        /// <param name="y">y行向量</param>
+        /// <param name="curveColor">曲线颜色</param>
+        /// <param name="curveStyle">曲线线型</param>
+        public void Plot(Matrix x, Matrix y, Color curveColor, System.Drawing.Drawing2D.DashStyle curveStyle)
+        {
+            this.Plot(x, y);
+            this.ChangeColor(xVal.Count - 1, curveColor);
+            this.ChangeLineStyle(xVal.Count - 1, curveStyle);
+        }
+        /// <summary>
         /// 移去所有已画函数
         /// </summary>
         public void RemoveAllFnc()
@@ -1001,6 +1057,8 @@ namespace AxisBox
             yValReorder.RemoveRange(0, yValReorder.Count);
             xValRepository.RemoveRange(0, xValRepository.Count);
             yValRepository.RemoveRange(0, yValRepository.Count);
+            lineColorList.RemoveRange(0, lineColorList.Count);
+            lineDashStyleList.RemoveRange(0, lineDashStyleList.Count);
             isPlotted = false;
             refit = false;
             refreshParameter();
@@ -1120,6 +1178,48 @@ namespace AxisBox
             }
             //finish
             return true;
+        }
+        /// <summary>
+        /// 设置曲线颜色
+        /// </summary>
+        /// <param name="dstCurve">要设置的目标曲线序号</param>
+        /// <param name="colorToChange">要设置成的颜色</param>
+        public void ChangeColor(int dstCurve, Color colorToChange)
+        {
+            if (dstCurve >= lineColorList.Count)
+                return;
+            else if (dstCurve < 0)
+                throw new Exception("要更改颜色的目标曲线序号小于0越界");
+            lineColorList[dstCurve] = colorToChange;
+            lineColor = Color.FromArgb(colorToChange.ToArgb());//同时改变默认颜色偏好
+        }
+        /// <summary>
+        /// 设置曲线线型
+        /// </summary>
+        /// <param name="dstCurve">要设置的目标曲线序号</param>
+        /// <param name="dashStyleToChange">要设置成的线型</param>
+        public void ChangeLineStyle(int dstCurve, System.Drawing.Drawing2D.DashStyle dashStyleToChange)
+        {
+            if (dstCurve >= lineColorList.Count)
+                return;
+            else if (dstCurve < 0)
+                throw new Exception("要更改颜色的目标曲线序号小于0越界");
+            lineDashStyleList[dstCurve] = dashStyleToChange;
+            switch (dashStyleToChange)//同时改变默认线性偏好
+            {
+                case System.Drawing.Drawing2D.DashStyle.Dash:
+                    lineDashStyle = System.Drawing.Drawing2D.DashStyle.Dash; break;
+                case System.Drawing.Drawing2D.DashStyle.DashDot:
+                    lineDashStyle = System.Drawing.Drawing2D.DashStyle.DashDot; break;
+                case System.Drawing.Drawing2D.DashStyle.DashDotDot:
+                    lineDashStyle = System.Drawing.Drawing2D.DashStyle.DashDotDot; break;
+                case System.Drawing.Drawing2D.DashStyle.Dot:
+                    lineDashStyle = System.Drawing.Drawing2D.DashStyle.Dot; break;
+                case System.Drawing.Drawing2D.DashStyle.Solid:
+                    lineDashStyle = System.Drawing.Drawing2D.DashStyle.Solid; break;
+                default:
+                    lineDashStyle = System.Drawing.Drawing2D.DashStyle.Solid; break;
+            } 
         }
         #endregion
 
@@ -1552,7 +1652,39 @@ namespace AxisBox
 
         private void plotDefineToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            
+            GenerateXY generateXY1 = new GenerateXY();
+            if (generateXY1.ShowDialog() == DialogResult.OK)
+            {
+                if (generateXY1.x != null && generateXY1.y != null)
+                {
+                    if (generateXY1.x.Columns == 1 && generateXY1.y.Columns == 1)
+                    {
+                        if (generateXY1.x.Rows == generateXY1.y.Rows)
+                        {
+                            try
+                            {
+                                Plot(Matrix.Transfer(generateXY1.x), Matrix.Transfer(generateXY1.y));
+                            }
+                            catch
+                            {
+                                MessageBox.Show("按给出数据绘图时出现不可知错误!");
+                            }
+                        }
+                        else
+                        {
+                            MessageBox.Show("设置的x,y变量个数不同!");
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("设置的x,y变量只能是列向量!");
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("没有设置x,y变量的值");
+                }
+            }
         }
 
         private void fitTargetToolStripComboBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -1681,6 +1813,10 @@ namespace AxisBox
             settings.discretePointColor = SamplePointColor;
             settings.colorDesComboBox.SelectedIndex = 0;
             settings.colorSetPanel.BackColor = BorderColor;
+
+            settings.lineColorSet = this.lineColorList;
+            settings.lineStyleSet = this.lineDashStyleList;
+            settings.initializeLists();
 
             settings.xMinTextBox.Text = XMin.ToString();
             settings.xMaxTextBox.Text = XMax.ToString();
@@ -1893,10 +2029,11 @@ namespace AxisBox
                 {
                     if (continuousOn)//是否画出连续曲线
                     {
-                        Pen funcPen = new Pen(this.lineColor, 1);
-                        funcPen.DashStyle = lineDashStyle;
+                        Pen funcPen;
                         for (int i = 0; i < phisicsX.Count; i++)
                         {
+                            funcPen = new Pen(lineColorList.ElementAt(i));
+                            funcPen.DashStyle = lineDashStyleList.ElementAt(i);
                             for (int j = 0; j < phisicsX.ElementAt(i).Columns - 1; j++)
                             {
                                 if (xVal.ElementAt(i)[0, j] >= xMin && xVal.ElementAt(i)[0, j + 1] <= xMax &&

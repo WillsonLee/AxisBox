@@ -34,6 +34,9 @@
     <Reference Include="Matrix">
       <HintPath>..\..\Matrix\Matrix\bin\Debug\Matrix.dll</HintPath>
     </Reference>
+    <Reference Include="MatrixGenerator">
+      <HintPath>..\..\MatrixGenerator\MatrixGenerator\bin\Debug\MatrixGenerator.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -45,6 +48,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GenerateXY.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GenerateXY.Designer.cs">
+      <DependentUpon>GenerateXY.cs</DependentUpon>
+    </Compile>
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -66,6 +75,9 @@
     <Service Include="{94E38DFF-614B-4cbd-B67C-F211BB35CE8B}" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="GenerateXY.resx">
+      <DependentUpon>GenerateXY.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>

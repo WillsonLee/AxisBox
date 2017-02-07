@@ -40,6 +40,8 @@ namespace AxisBox
         /// 曲线线型
         /// </summary>
         public System.Drawing.Drawing2D.DashStyle curveDashStyle;
+        public List<Color> lineColorSet;
+        public List<System.Drawing.Drawing2D.DashStyle> lineStyleSet;
         /// <summary>
         /// 构造函数
         /// </summary>
@@ -58,6 +60,21 @@ namespace AxisBox
                 case System.Drawing.Drawing2D.DashStyle.Dot: dotRadioButton.Checked = true; break;
                 case System.Drawing.Drawing2D.DashStyle.Solid: solidRadioButton.Checked = true; break;
             }
+        }
+
+        public void initializeLists()
+        {
+            int countTemp = lineColorSet.Count;
+            for (int i = 0; i < countTemp; i++)
+            {
+                indexComboBox.Items.Add("曲线" + i.ToString());
+            }
+            lineStyleComboBox.Items.Add("虚线");
+            lineStyleComboBox.Items.Add("点划线");
+            lineStyleComboBox.Items.Add("双点划线");
+            lineStyleComboBox.Items.Add("点线");
+            lineStyleComboBox.Items.Add("实线");
+            indexComboBox.SelectedIndex = 0;
         }
 
         private void SettingForm_Deactivate(object sender, EventArgs e)
@@ -189,6 +206,41 @@ namespace AxisBox
                 }
                 e.Handled = dotFlag;
             } 
+        }
+
+        private void indexComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            lineColorPanel.BackColor = lineColorSet.ElementAt(indexComboBox.SelectedIndex);
+            switch (lineStyleSet.ElementAt(indexComboBox.SelectedIndex))
+            {
+                case System.Drawing.Drawing2D.DashStyle.Dash: lineStyleComboBox.SelectedIndex = 0; break;
+                case System.Drawing.Drawing2D.DashStyle.DashDot: lineStyleComboBox.SelectedIndex = 1; break;
+                case System.Drawing.Drawing2D.DashStyle.DashDotDot: lineStyleComboBox.SelectedIndex = 2; break;
+                case System.Drawing.Drawing2D.DashStyle.Dot: lineStyleComboBox.SelectedIndex = 3; break;
+                case System.Drawing.Drawing2D.DashStyle.Solid: lineStyleComboBox.SelectedIndex = 4; break;
+            }
+        }
+
+        private void lineStyleComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            switch (lineStyleComboBox.SelectedIndex)
+            {
+                case 0: lineStyleSet[indexComboBox.SelectedIndex] = System.Drawing.Drawing2D.DashStyle.Dash; break;
+                case 1: lineStyleSet[indexComboBox.SelectedIndex] = System.Drawing.Drawing2D.DashStyle.DashDot; break;
+                case 2: lineStyleSet[indexComboBox.SelectedIndex] = System.Drawing.Drawing2D.DashStyle.DashDotDot; break;
+                case 3: lineStyleSet[indexComboBox.SelectedIndex] = System.Drawing.Drawing2D.DashStyle.Dot; break;
+                case 4: lineStyleSet[indexComboBox.SelectedIndex] = System.Drawing.Drawing2D.DashStyle.Solid; break;
+            }
+        }
+
+        private void lineColorPanel_Click(object sender, EventArgs e)
+        {
+            ColorDialog colorDialog1 = new ColorDialog();
+            if (colorDialog1.ShowDialog() == DialogResult.OK)
+            {
+                lineColorPanel.BackColor = colorDialog1.Color;
+                lineColorSet[indexComboBox.SelectedIndex] = colorDialog1.Color;
+            }
         }
     }
 }

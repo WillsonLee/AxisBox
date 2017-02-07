@@ -11,3 +11,7 @@ D:\workdir\VSWorkspace\AxisBox\AxisBox\bin\Debug\Matrix.xml
 D:\workdir\VSWorkspace\AxisBox\AxisBox\bin\Debug\AxisBox.XML
 D:\workdir\VSWorkspace\AxisBox\AxisBox\obj\Debug\AxisBox.Properties.Resources.resources
 D:\workdir\VSWorkspace\AxisBox\AxisBox\obj\Debug\AxisBox.SettingForm.resources
+D:\workdir\VSWorkspace\AxisBox\AxisBox\obj\Debug\AxisBox.GenerateXY.resources
+D:\workdir\VSWorkspace\AxisBox\AxisBox\bin\Debug\MatrixGenerator.dll
+D:\workdir\VSWorkspace\AxisBox\AxisBox\bin\Debug\MatrixGenerator.pdb
+D:\workdir\VSWorkspace\AxisBox\AxisBox\bin\Debug\MatrixGenerator.xml

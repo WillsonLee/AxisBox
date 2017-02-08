@@ -42,7 +42,7 @@ namespace AxisBox
             {
                 for (int i = 0; i < matrixGenerator1.Workspace.Count; i++)
                 {
-                    sender_obj.Items.Add("矩阵" + i.ToString());
+                    sender_obj.Items.Add(matrixGenerator1.varNameList[i]);
                 }
             }
         }

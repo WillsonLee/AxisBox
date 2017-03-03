@@ -18,6 +18,7 @@ namespace AxisBox
         public GenerateXY()
         {
             InitializeComponent();
+            matrixGenerator1.SetInitializeFunc(5);
         }
 
         private void button1_Click(object sender, EventArgs e)

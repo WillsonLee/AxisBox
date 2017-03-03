@@ -20,6 +20,12 @@
             构造一个矩阵生成器对象
             </summary>
         </member>
+        <member name="M:MatrixGenerator.MatrixGenerator.SetInitializeFunc(System.Int32)">
+            <summary>
+            设置初始化的函数序号
+            </summary>
+            <param name="funcIndex">初始化时函数的序号</param>
+        </member>
         <member name="F:MatrixGenerator.MatrixGenerator.components">
             <summary>
             必需的设计器变量。

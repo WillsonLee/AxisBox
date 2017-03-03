@@ -994,7 +994,7 @@ namespace AxisBox
             }
             for (int i = 0; i < xVal.Count; i++)
             {
-                fitTargetToolStripComboBox.Items.Add(i.ToString());
+                fitTargetToolStripComboBox.Items.Add("曲线" + i.ToString());
             }
             fitTimesToolStripComboBox.SelectedIndex = 0;
             fitTargetToolStripComboBox.SelectedIndex = 0;

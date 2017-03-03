@@ -2267,6 +2267,10 @@ namespace AxisBox
 
         private void AxisBox_SizeChanged(object sender, EventArgs e)
         {
+            if (AxisEqual)
+            {
+                AxisEqual = true;
+            }
             refreshParameter();
         }
     }

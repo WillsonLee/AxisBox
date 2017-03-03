@@ -144,6 +144,11 @@
             函数画图板控件
             </summary>
         </member>
+        <member name="F:AxisBox.AxisBox.CurrentCoordListeners">
+            <summary>
+            当前指针所在点坐标移动监听器列表
+            </summary>
+        </member>
         <member name="M:AxisBox.AxisBox.#ctor">
             <summary>
             构造器
@@ -256,6 +261,11 @@
         <member name="P:AxisBox.AxisBox.YLog">
             <summary>
             y轴是否取对数坐标(注意只有y数据不越过数据0才能转换成对数坐标)
+            </summary>
+        </member>
+        <member name="P:AxisBox.AxisBox.BoxOn">
+            <summary>
+            边框是否显示
             </summary>
         </member>
         <member name="P:AxisBox.AxisBox.GridOn">
@@ -403,6 +413,16 @@
             y最大值
             </summary>
         </member>
+        <member name="P:AxisBox.AxisBox.CurrentMovingX">
+            <summary>
+            当前指针所处点横坐标
+            </summary>
+        </member>
+        <member name="P:AxisBox.AxisBox.CurrentMovingY">
+            <summary>
+            当前指针所处点纵坐标
+            </summary>
+        </member>
         <member name="P:AxisBox.AxisBox.CurveColor">
             <summary>
             函数曲线颜色
@@ -432,6 +452,18 @@
             <summary>
             函数曲线线型
             </summary>
+        </member>
+        <member name="T:AxisBox.AxisBox.CoordListener">
+            <summary>
+            当前指针位置坐标变化监听器接口
+            </summary>
+        </member>
+        <member name="M:AxisBox.AxisBox.CoordListener.coordChanged(System.Double,System.Double)">
+            <summary>
+            当当前指针位置发生变化时自动调用该函数
+            </summary>
+            <param name="x">指针处x坐标</param>
+            <param name="y">指针处y坐标</param>
         </member>
     </members>
 </doc>

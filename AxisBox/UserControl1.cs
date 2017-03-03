@@ -24,6 +24,7 @@ namespace AxisBox
         private bool yAxis = true;
         private bool xLog = false;
         private bool yLog = false;
+        private bool boxOn = true;
         private bool gridOn = true;
         private bool holdOn = false;
         private bool titleOn = false;
@@ -93,6 +94,8 @@ namespace AxisBox
         private double yMaxRepository;
         private double xStepRepository;
         private double yStepRepository;
+        private double currentMovingX = 0;
+        private double currentMovingY = 0;
         #endregion
 
         #region 访问器
@@ -226,6 +229,21 @@ namespace AxisBox
                         }
                     }
                     yLogToolStripMenuItem.Checked = YLog;
+                }
+            }
+        }
+        /// <summary>
+        /// 边框是否显示
+        /// </summary>
+        public bool BoxOn
+        {
+            get { return boxOn; }
+            set
+            {
+                if (isPlotted)
+                {
+                    boxOn = value;
+                    Invalidate();
                 }
             }
         }
@@ -774,6 +792,42 @@ namespace AxisBox
             }
         }
         /// <summary>
+        /// 当前指针所处点横坐标
+        /// </summary>
+        public double CurrentMovingX
+        {
+            get { return currentMovingX; }
+            set
+            {
+                if (isPlotted)
+                {
+                    currentMovingX = value;
+                    for (int i = 0; i < CurrentCoordListeners.Count; i++)
+                    {
+                        CurrentCoordListeners[i].coordChanged(CurrentMovingX, CurrentMovingY);
+                    }
+                }
+            }
+        }
+        /// <summary>
+        /// 当前指针所处点纵坐标
+        /// </summary>
+        public double CurrentMovingY
+        {
+            get { return currentMovingY; }
+            set
+            {
+                if (isPlotted)
+                {
+                    currentMovingY = value;
+                    for (int i = 0; i < CurrentCoordListeners.Count; i++)
+                    {
+                        CurrentCoordListeners[i].coordChanged(CurrentMovingX, CurrentMovingY);
+                    }
+                }
+            }
+        }
+        /// <summary>
         /// 函数曲线颜色
         /// </summary>
         public Color CurveColor
@@ -863,6 +917,10 @@ namespace AxisBox
                 }
             }
         }
+        /// <summary>
+        /// 当前指针所在点坐标移动监听器列表
+        /// </summary>
+        public List<CoordListener> CurrentCoordListeners = new List<CoordListener>();
         #endregion
 
         #region 功能函数
@@ -1283,12 +1341,12 @@ namespace AxisBox
             double result;
             if (!xLog)
             {
-                result = (xCoordinate - marginWidth) / plotArea.Width * (xMax - xMin) + xMin;
+                result = (double)(xCoordinate - marginWidth) / (double)plotArea.Width * (xMax - xMin) + xMin;
             }
             else
             {
                 double logRange = Math.Log10(xMax) - Math.Log10(xMin);
-                result = Math.Pow(10, (xCoordinate - marginWidth) / plotArea.Width * logRange + Math.Log10(xMin));
+                result = Math.Pow(10, (double)(xCoordinate - marginWidth) / (double)plotArea.Width * logRange + Math.Log10(xMin));
             }
             return result;
         }
@@ -1297,12 +1355,12 @@ namespace AxisBox
             double result;
             if (!yLog)
             {
-                result = (this.Height - yCoordinate - marginHeight) / plotArea.Height * (yMax - yMin) + yMin;
+                result = (double)(this.Height - yCoordinate - marginHeight) / (double)plotArea.Height * (yMax - yMin) + yMin;
             }
             else
             {
                 double logRange = Math.Log10(yMax) - Math.Log10(yMin);
-                result = Math.Pow(10, (this.Height - yCoordinate) / plotArea.Height * logRange + Math.Log10(yMin));
+                result = Math.Pow(10, (double)(this.Height - yCoordinate - marginHeight) / (double)plotArea.Height * logRange + Math.Log10(yMin));
             }
             return result;
         }
@@ -1872,6 +1930,21 @@ namespace AxisBox
         }
         #endregion
 
+        #region 内嵌类和接口
+        /// <summary>
+        /// 当前指针位置坐标变化监听器接口
+        /// </summary>
+        public interface CoordListener
+        {
+            /// <summary>
+            /// 当当前指针位置发生变化时自动调用该函数
+            /// </summary>
+            /// <param name="x">指针处x坐标</param>
+            /// <param name="y">指针处y坐标</param>
+            void coordChanged(double x, double y);
+        }
+        #endregion
+
         private void AxisBox_Paint(object sender, PaintEventArgs e)
         {
             if (isPlotted)//画函数图的时候
@@ -1882,6 +1955,8 @@ namespace AxisBox
                 g.FillRectangle(backgroundBrush, new Rectangle(0, 0, this.Width, this.Height));
                 backgroundBrush = new SolidBrush(backgroundColor);
                 g.FillRectangle(backgroundBrush, plotArea);
+                Pen boxPen = new Pen(Color.Black, 1);
+                g.DrawRectangle(boxPen, plotArea);
                 #region 画x轴
                 if (xAxis)
                 {
@@ -2123,6 +2198,8 @@ namespace AxisBox
 
         private void AxisBox_MouseMove(object sender, MouseEventArgs e)//鼠标移动可以自动捕捉坐标点
         {
+            CurrentMovingX = ToActualX(e.X);
+            CurrentMovingY = ToActualY(e.Y);
             capture = false;//一移动就设capture为false,只有当捕捉到点才设为true
             if (captureMode)//捕捉模式已打开
             {

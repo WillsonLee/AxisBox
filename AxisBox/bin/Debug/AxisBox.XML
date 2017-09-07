@@ -198,9 +198,44 @@
             <param name="curveColor">曲线颜色</param>
             <param name="curveStyle">曲线线型</param>
         </member>
+        <member name="M:AxisBox.AxisBox.Polar(MatrixTool.Matrix,MatrixTool.Matrix)">
+            <summary>
+            根据极坐标画图
+            </summary>
+            <param name="pho">半径值</param>
+            <param name="theta">转角值</param>
+        </member>
+        <member name="M:AxisBox.AxisBox.Rotate(System.Double,System.Boolean)">
+            <summary>
+            使图像旋转指定角度
+            </summary>
+            <param name="degree">旋转角度(角度制)</param>
+            <param name="reverse">是否反向(顺时针)</param>
+        </member>
+        <member name="M:AxisBox.AxisBox.Rotate90(System.Boolean)">
+            <summary>
+            将图像旋转90度
+            </summary>
+            <param name="reverse">是否反向(顺时针)</param>
+        </member>
         <member name="M:AxisBox.AxisBox.RemoveAllFnc">
             <summary>
             移去所有已画函数
+            </summary>
+        </member>
+        <member name="M:AxisBox.AxisBox.AddFloatingString(System.String,System.Int32,System.Int32,System.Drawing.Font,System.Drawing.Brush)">
+            <summary>
+            在图形上画浮动字体
+            </summary>
+            <param name="text">文本内容</param>
+            <param name="xCoord">x坐标</param>
+            <param name="yCoord">y坐标</param>
+            <param name="fontOfText">文本字体</param>
+            <param name="textBrush">文本色刷</param>
+        </member>
+        <member name="M:AxisBox.AxisBox.RemoveAllFont">
+            <summary>
+            移除所有浮动文字
             </summary>
         </member>
         <member name="M:AxisBox.AxisBox.Fit(System.Int32)">
@@ -226,6 +261,12 @@
             <param name="dstCurve">要设置的目标曲线序号</param>
             <param name="dashStyleToChange">要设置成的线型</param>
         </member>
+        <member name="M:AxisBox.AxisBox.SaveFigure">
+            <summary>
+            保存当前图像
+            </summary>
+            <returns>保存成功返回true否则为false</returns>
+        </member>
         <member name="F:AxisBox.AxisBox.components">
             <summary>
             必需的设计器变量。
@@ -241,6 +282,11 @@
             <summary>
             设计器支持所需的方法 - 不要
             使用代码编辑器修改此方法的内容。
+            </summary>
+        </member>
+        <member name="P:AxisBox.AxisBox.IsPlotted">
+            <summary>
+            是否已画出图像
             </summary>
         </member>
         <member name="P:AxisBox.AxisBox.XAxisOn">
@@ -383,6 +429,16 @@
             进行曲线拟合的拟合次数
             </summary>
         </member>
+        <member name="P:AxisBox.AxisBox.MarginEWDevide">
+            <summary>
+            获取与设置左右页边为总宽度的几分之一
+            </summary>
+        </member>
+        <member name="P:AxisBox.AxisBox.MarginNSDevide">
+            <summary>
+            获取与设置上下页边是高度的几分之一
+            </summary>
+        </member>
         <member name="P:AxisBox.AxisBox.XStep">
             <summary>
             x轴分度值
@@ -464,6 +520,17 @@
             </summary>
             <param name="x">指针处x坐标</param>
             <param name="y">指针处y坐标</param>
+        </member>
+        <member name="T:AxisBox.AxisBox.IsPlottedListener">
+            <summary>
+            是否画出图形监听
+            </summary>
+        </member>
+        <member name="M:AxisBox.AxisBox.IsPlottedListener.curvePlotted(System.Boolean)">
+            <summary>
+            当isPlotted变量发生变化时调用这个函数
+            </summary>
+            <param name="crvIsPlotted"></param>
         </member>
     </members>
 </doc>

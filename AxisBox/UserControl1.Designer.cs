@@ -28,8 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
-            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip();
             this.plotToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.plotDefaultToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.plotDefineToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -91,7 +90,7 @@
             this.darkThemeToolStripMenuItem,
             this.settingsToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(155, 506);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(155, 484);
             this.contextMenuStrip1.Text = "快捷开关";
             // 
             // plotToolStripMenuItem
@@ -341,6 +340,7 @@
             // 
             // settingsToolStripMenuItem
             // 
+            this.settingsToolStripMenuItem.Enabled = false;
             this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
             this.settingsToolStripMenuItem.Size = new System.Drawing.Size(154, 22);
             this.settingsToolStripMenuItem.Text = "其他设置...";
@@ -352,6 +352,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ContextMenuStrip = this.contextMenuStrip1;
             this.DoubleBuffered = true;
+            this.MinimumSize = new System.Drawing.Size(1, 1);
             this.Name = "AxisBox";
             this.Size = new System.Drawing.Size(311, 247);
             this.SizeChanged += new System.EventHandler(this.AxisBox_SizeChanged);

@@ -541,7 +541,16 @@
             </summary>
             <param name="point_x">给出点x坐标的列向量</param>
             <param name="point_y">给出点y坐标的列向量</param>
-            <returns></returns>
+            <returns>返回多元一次方程组的解反算的参数</returns>
+        </member>
+        <member name="M:MatrixTool.Matrix.Fit(MatrixTool.Matrix,MatrixTool.Matrix,System.Int32)">
+            <summary>
+                    返回两个列向量组成的点序列拟合参数(目前只完成1次拟合部分)
+            </summary>
+            <param name="x">给出点的x坐标</param>
+            <param name="y">给出点的y坐标</param>
+            <param name="times">给定拟合次数</param>
+            <returns>返回拟合参数</returns>
         </member>
         <member name="M:MatrixTool.Matrix.ConcatenateByRow(MatrixTool.Matrix,MatrixTool.Matrix)">
             <summary>

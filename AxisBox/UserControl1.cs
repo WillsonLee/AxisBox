@@ -50,7 +50,7 @@ namespace AxisBox
         private string plotTitle = "新的绘图";
         private int plotTitleSize = 9;
         private Point originPoint;
-        private Rectangle plotArea;
+        protected Rectangle plotArea;//为了继承的时候能够获知plotArea
         private int marginWidth;
         private int marginHeight;
         private Color borderColor = Color.LightGray;//边框颜色
@@ -72,7 +72,13 @@ namespace AxisBox
         private Point capturePoint = new Point(0, 0);
         private PointF capturePointActual = new PointF(0, 0);
         private int sensitivity = 30;//表示捕捉点的敏感度,默认为半径30像素以内
+        private float marginEWDevide = 20;
+        private float marginNSDevide = 20;
         private List<int> targetsBeenFitted = new List<int>();//表示哪些曲线已经被拟合过了
+        private List<string> floatingText = new List<string>();
+        private List<Font> floatingFont = new List<Font>();
+        private List<Brush> floatingBrush = new List<Brush>();
+        private List<Point> floatingLocation = new List<Point>();//字符串实际坐标位置
         //绘图数据
         private List<Matrix> xVal = new List<Matrix>();
         private List<Matrix> yVal = new List<Matrix>();
@@ -101,6 +107,25 @@ namespace AxisBox
         #region 访问器
         //在调用Plot函数前,部分属性是不可改的//即尽量任何属性的更改都在使用Plot函数之后
         /// <summary>
+        /// 是否已画出图像
+        /// </summary>
+        public bool IsPlotted
+        {
+            get { return isPlotted; }
+            set
+            {
+                isPlotted = value;
+                for (int i = 0; i < CurvePlotListeners.Count; i++)
+                {
+                    CurvePlotListeners[i].curvePlotted(isPlotted);
+                }
+                if (PlotStateChanged != null)
+                {
+                    PlotStateChanged(isPlotted);
+                }
+            }
+        }
+        /// <summary>
         /// x轴是否显示
         /// </summary>
         public bool XAxisOn
@@ -108,7 +133,7 @@ namespace AxisBox
             get { return xAxis; }
             set 
             {
-                if (isPlotted)
+                if (IsPlotted)
                 {
                     xAxis = value;
                     xAxisOnToolStripMenuItem.Checked = XAxisOn;//右键菜单处理
@@ -128,7 +153,7 @@ namespace AxisBox
                     {
                         xTickLabelOnToolStripMenuItem.Enabled = false;
                     }
-                    Invalidate(); 
+                    Invalidate();
                 }
             }
         }
@@ -140,21 +165,27 @@ namespace AxisBox
             get { return yAxis; }
             set
             {
-                if (isPlotted)
+                if (IsPlotted)
                 {
                     yAxis = value;
                     yAxisOnToolStripMenuItem.Checked = YAxisOn;//右键菜单处理
-                    if (!yAxisOnToolStripMenuItem.Checked)
+                    if (YAxisOn)
                     {
-                        yTickOnToolStripMenuItem.Enabled = false;
-                        yTickLabelOnToolStripMenuItem.Enabled = false;
+                        yTickOnToolStripMenuItem.Enabled = true;
                     }
                     else
                     {
-                        yTickOnToolStripMenuItem.Enabled = true;
+                        yTickOnToolStripMenuItem.Enabled = false;
+                    }
+                    if (YAxisOn && YTickOn)
+                    {
                         yTickLabelOnToolStripMenuItem.Enabled = true;
                     }
-                    Invalidate(); 
+                    else
+                    {
+                        yTickLabelOnToolStripMenuItem.Enabled = false;
+                    }
+                    Invalidate();
                 }
             }
         }
@@ -166,13 +197,13 @@ namespace AxisBox
             get { return xLog; }
             set
             {
-                if (isPlotted)
+                if (IsPlotted)
                 {
                     if (value)//改成对数坐标
                     {
                         if (!xLog)
                         {
-                            if (xMax * xMin > 0)//如果正负坐标都有不能转化为对数坐标
+                            if (xMax * xMin > 0)//如果正负坐标都有不能转化为对数坐标//同为负的情况还不知道怎么弄
                             {
                                 xLog = value;
                                 this.XToLog();//更新坐标原点及步距
@@ -203,7 +234,7 @@ namespace AxisBox
             get { return yLog; }
             set
             {
-                if (isPlotted)
+                if (IsPlotted)
                 {
                     if (value)//改成对数坐标
                     {
@@ -240,7 +271,7 @@ namespace AxisBox
             get { return boxOn; }
             set
             {
-                if (isPlotted)
+                if (IsPlotted)
                 {
                     boxOn = value;
                     Invalidate();
@@ -255,7 +286,7 @@ namespace AxisBox
             get { return gridOn; }
             set
             {
-                if (isPlotted)
+                if (IsPlotted)
                 {
                     gridOn = value;
                     gridOnToolStripMenuItem.Checked = GridOn;//右键菜单处理
@@ -271,11 +302,11 @@ namespace AxisBox
             get { return holdOn; }
             set
             {
-                if (isPlotted)
+                if (IsPlotted)
                 {
                     holdOn = value;
                     holdOnToolStripMenuItem.Checked = HoldOn;
-                    Invalidate(); 
+                    Invalidate();
                 }
             }
         }
@@ -287,11 +318,11 @@ namespace AxisBox
             get { return titleOn; }
             set
             {
-                if (isPlotted)
+                if (IsPlotted)
                 {
                     titleOn = value;
                     titleOnToolStripMenuItem.Checked = TitleOn;
-                    Invalidate(); 
+                    Invalidate();
                 }
             }
         }
@@ -303,11 +334,11 @@ namespace AxisBox
             get { return xLabelOn; }
             set
             {
-                if (isPlotted)
+                if (IsPlotted)
                 {
                     xLabelOn = value;
                     xLabelOnToolStripMenuItem.Checked = XLabelOn;
-                    Invalidate(); 
+                    Invalidate();
                 }
             }
         }
@@ -319,11 +350,11 @@ namespace AxisBox
             get { return yLabelOn; }
             set
             {
-                if (isPlotted)
+                if (IsPlotted)
                 {
                     yLabelOn = value;
                     yLabelOnToolStripMenuItem.Checked = YLabelOn;
-                    Invalidate(); 
+                    Invalidate();
                 }
             }
         }
@@ -336,10 +367,6 @@ namespace AxisBox
             set
             {
                 xTickOn = value;
-                if (isPlotted)
-                {
-                    Invalidate();
-                }
                 xTickOnToolStripMenuItem.Checked = XTickOn;//右键菜单处理
                 if (XTickOn && XAxisOn)
                 {
@@ -348,6 +375,10 @@ namespace AxisBox
                 else
                 {
                     xTickLabelOnToolStripMenuItem.Enabled = false;
+                }
+                if (IsPlotted)
+                {
+                    Invalidate();
                 }
             }
         }
@@ -360,10 +391,6 @@ namespace AxisBox
             set
             {
                 yTickOn = value;
-                if (isPlotted)
-                {
-                    Invalidate();
-                }
                 yTickOnToolStripMenuItem.Checked = YTickOn;//右键菜单处理
                 if (YTickOn && YAxisOn)
                 {
@@ -372,6 +399,10 @@ namespace AxisBox
                 else
                 {
                     yTickLabelOnToolStripMenuItem.Enabled = false;
+                }
+                if (IsPlotted)
+                {
+                    Invalidate();
                 }
             }
         }
@@ -384,11 +415,11 @@ namespace AxisBox
             set
             {
                 xTickLabelOn = value;
-                if (isPlotted)
+                xTickLabelOnToolStripMenuItem.Checked = XTickLabelOn;
+                if (IsPlotted)
                 {
                     Invalidate();
                 }
-                xTickLabelOnToolStripMenuItem.Checked = XTickLabelOn;
             }
         }
         /// <summary>
@@ -400,11 +431,11 @@ namespace AxisBox
             set
             {
                 yTickLabelOn = value;
-                if (isPlotted)
+                yTickLabelOnToolStripMenuItem.Checked = YTickLabelOn;
+                if (IsPlotted)
                 {
                     Invalidate();
                 }
-                yTickLabelOnToolStripMenuItem.Checked = YTickLabelOn;
             }
         }
         /// <summary>
@@ -415,11 +446,11 @@ namespace AxisBox
             get { return captureMode; }
             set
             {
-                if (isPlotted)
+                if (IsPlotted)
                 {
                     captureMode = value;
                     captrueModeToolStripMenuItem.Checked = CaptureMode;
-                    Invalidate(); 
+                    Invalidate();
                 }
             }
         }
@@ -444,7 +475,7 @@ namespace AxisBox
                     backgroundColor = Color.White;
                     axisAndLabelColor = Color.Black;
                 }
-                if (isPlotted)
+                if (IsPlotted)
                 {
                     Invalidate();
                 }
@@ -459,11 +490,11 @@ namespace AxisBox
             get { return continuousOn; }
             set
             {
-                if (isPlotted)
+                if (IsPlotted)
                 {
                     continuousOn = value;
                     continuousOnToolStripMenuItem.Checked = ContinuousOn;
-                    Invalidate(); 
+                    Invalidate();
                 }
             }
         }
@@ -475,11 +506,11 @@ namespace AxisBox
             get { return discreteOn; }
             set
             {
-                if (isPlotted)
+                if (IsPlotted)
                 {
                     discreteOn = value;
                     discreteOnToolStripMenuItem.Checked = DiscreteOn;
-                    Invalidate(); 
+                    Invalidate();
                 }
             }
         }
@@ -510,7 +541,7 @@ namespace AxisBox
             get { return axisEqual; }
             set
             {
-                if (isPlotted)
+                if (IsPlotted)
                 {
                     axisEqual = value;
                     if (value)//等比例
@@ -520,17 +551,23 @@ namespace AxisBox
                             double xRange = xMaxRepository - xMinRepository;
                             double yRange = yMaxRepository - yMinRepository;
                             double plotRatio = (double)plotArea.Width / plotArea.Height;
+                            double centerX = (this.xMax + this.xMin) / 2;
+                            double centerY = (this.yMax + this.yMin) / 2;
                             if ((xRange / yRange) > plotRatio)
                             {
                                 yRange = xRange / plotRatio;
-                                yMax = yMin + yRange;
+                                //yMax = yMin + yRange;
+                                yMin = centerY - yRange / 2;
+                                yMax = centerY + yRange / 2;
                                 xStep = xStepRepository;
                                 yStep = xStepRepository;
                             }
                             else
                             {
                                 xRange = yRange * plotRatio;
-                                xMax = xMin + xRange;
+                                //xMax = xMin + xRange;
+                                xMin = centerX - xRange / 2;
+                                xMax = centerX + xRange / 2;
                                 xStep = yStepRepository;
                                 yStep = yStepRepository;
                             }
@@ -570,10 +607,10 @@ namespace AxisBox
             get { return xLabel; }
             set
             {
-                if (isPlotted)
+                if (IsPlotted)
                 {
                     xLabel = value;
-                    Invalidate(); 
+                    Invalidate();
                 }
             }
         }
@@ -585,10 +622,10 @@ namespace AxisBox
             get { return yLabel; }
             set
             {
-                if (isPlotted)
+                if (IsPlotted)
                 {
                     yLabel = value;
-                    Invalidate(); 
+                    Invalidate();
                 }
             }
         }
@@ -600,10 +637,10 @@ namespace AxisBox
             get { return plotTitle; }
             set
             {
-                if (isPlotted)
+                if (IsPlotted)
                 {
                     plotTitle = value;
-                    Invalidate(); 
+                    Invalidate();
                 }
             }
         }
@@ -615,10 +652,10 @@ namespace AxisBox
             get { return xLabelSize; }
             set
             {
-                if (isPlotted)
+                if (IsPlotted)
                 {
                     xLabelSize = value;
-                    Invalidate(); 
+                    Invalidate();
                 }
             }
         }
@@ -630,10 +667,10 @@ namespace AxisBox
             get { return yLabelSize; }
             set
             {
-                if (isPlotted)
+                if (IsPlotted)
                 {
                     yLabelSize = value;
-                    Invalidate(); 
+                    Invalidate();
                 }
             }
         }
@@ -645,10 +682,10 @@ namespace AxisBox
             get { return plotTitleSize; }
             set
             {
-                if (isPlotted)
+                if (IsPlotted)
                 {
                     plotTitleSize = value;
-                    Invalidate(); 
+                    Invalidate();
                 }
             }
         }
@@ -660,10 +697,10 @@ namespace AxisBox
             get { return radiusOfSamplePoint; }
             set
             {
-                if (isPlotted)
+                if (IsPlotted)
                 {
                     radiusOfSamplePoint = value;
-                    Invalidate(); 
+                    Invalidate();
                 }
             }
         }
@@ -675,10 +712,58 @@ namespace AxisBox
             get { return fitTimes; }
             set
             {
-                if (isPlotted)
+                if (IsPlotted)
                 {
                     fitTimes = value;
                 }
+            }
+        }
+        /// <summary>
+        /// 获取与设置左右页边为总宽度的几分之一
+        /// </summary>
+        public float MarginEWDevide
+        {
+            get { return marginEWDevide; }
+            set
+            {
+                marginEWDevide = value;
+                marginWidth = (int)(this.Width / marginEWDevide);
+                marginHeight = (int)(this.Height / marginNSDevide);
+                plotArea = new Rectangle(marginWidth, marginHeight,
+                                            this.Width - 2 * marginWidth, this.Height - 2 * marginHeight);
+                if (IsPlotted)
+                {
+                    refreshParameter();
+                }
+                if (LeftRightMarginChanged != null)
+                {
+                    LeftRightMarginChanged(this.CreateGraphics(), this.plotArea, new Rectangle(0, 0, this.Width, this.Height));
+                }
+                Invalidate();
+            }
+        }
+        /// <summary>
+        /// 获取与设置上下页边是高度的几分之一
+        /// </summary>
+        public float MarginNSDevide
+        {
+            get { return marginNSDevide; }
+            set
+            {
+                marginNSDevide = value;
+                marginWidth = (int)(this.Width / marginEWDevide);
+                marginHeight = (int)(this.Height / marginNSDevide);
+                plotArea = new Rectangle(marginWidth, marginHeight,
+                                            this.Width - 2 * marginWidth, this.Height - 2 * marginHeight);
+                if (IsPlotted)
+                {
+                    refreshParameter();
+                }
+                if (UpDownMarginChanged != null)
+                {
+                    UpDownMarginChanged(this.CreateGraphics(), this.plotArea, new Rectangle(0, 0, this.Width, this.Height));
+                }
+                Invalidate();
             }
         }
         /// <summary>
@@ -689,7 +774,7 @@ namespace AxisBox
             get { return xStep; }
             set
             {
-                if (isPlotted)
+                if (IsPlotted)
                 {
                     xStep = value;
                     refreshParameter();
@@ -705,7 +790,7 @@ namespace AxisBox
             get { return yStep; }
             set
             {
-                if (isPlotted)
+                if (IsPlotted)
                 {
                     yStep = value;
                     refreshParameter();
@@ -721,7 +806,7 @@ namespace AxisBox
             get { return xMin; }
             set
             {
-                if (isPlotted)
+                if (IsPlotted)
                 {
                     if (value<xMax)
                     {
@@ -741,7 +826,7 @@ namespace AxisBox
             get { return xMax; }
             set
             {
-                if (isPlotted)
+                if (IsPlotted)
                 {
                     if (value>xMin)
                     {
@@ -760,7 +845,7 @@ namespace AxisBox
             get { return yMin; }
             set
             {
-                if (isPlotted)
+                if (IsPlotted)
                 {
                     if (value<yMax)
                     {
@@ -780,7 +865,7 @@ namespace AxisBox
             get { return yMax; }
             set
             {
-                if (isPlotted)
+                if (IsPlotted)
                 {
                     if (value>yMin)
                     {
@@ -799,7 +884,7 @@ namespace AxisBox
             get { return currentMovingX; }
             set
             {
-                if (isPlotted)
+                if (IsPlotted)
                 {
                     currentMovingX = value;
                     for (int i = 0; i < CurrentCoordListeners.Count; i++)
@@ -817,7 +902,7 @@ namespace AxisBox
             get { return currentMovingY; }
             set
             {
-                if (isPlotted)
+                if (IsPlotted)
                 {
                     currentMovingY = value;
                     for (int i = 0; i < CurrentCoordListeners.Count; i++)
@@ -835,7 +920,7 @@ namespace AxisBox
             get { return lineColor; }
             set
             {
-                if (isPlotted)
+                if (IsPlotted)
                 {
                     lineColor = value;
                     Invalidate();
@@ -850,7 +935,7 @@ namespace AxisBox
             get { return samplePointColor; }
             set
             {
-                if (isPlotted)
+                if (IsPlotted)
                 {
                     samplePointColor = value;
                     Invalidate();
@@ -865,7 +950,7 @@ namespace AxisBox
             get { return borderColor; }
             set
             {
-                if (isPlotted)
+                if (IsPlotted)
                 {
                     borderColor = value;
                     this.Invalidate();
@@ -880,7 +965,7 @@ namespace AxisBox
             get { return backgroundColor; }
             set
             {
-                if (isPlotted)
+                if (IsPlotted)
                 {
                     backgroundColor = value;
                     Invalidate();
@@ -895,7 +980,7 @@ namespace AxisBox
             get { return axisAndLabelColor; }
             set
             {
-                if (isPlotted)
+                if (IsPlotted)
                 {
                     axisAndLabelColor = value;
                     Invalidate();
@@ -910,7 +995,7 @@ namespace AxisBox
             get { return lineDashStyle; }
             set
             {
-                if (isPlotted)
+                if (IsPlotted)
                 {
                     lineDashStyle = value;
                     Invalidate();
@@ -921,6 +1006,13 @@ namespace AxisBox
         /// 当前指针所在点坐标移动监听器列表
         /// </summary>
         public List<CoordListener> CurrentCoordListeners = new List<CoordListener>();
+        public List<IsPlottedListener> CurvePlotListeners = new List<IsPlottedListener>();//比较Java的方式
+        public PlotStateChangedHandler PlotStateChanged = null;
+        public PaintBeforeAll BeforePaint = null;
+        public PaintAfterAll AfterPaint = null;
+        public SizeChangedHook SizeChaned_EventHook = null;
+        public MarginEWChanged LeftRightMarginChanged = null;
+        public MarginNSChanged UpDownMarginChanged = null;
         #endregion
 
         #region 功能函数
@@ -930,8 +1022,8 @@ namespace AxisBox
         public AxisBox()
         {
             InitializeComponent();
-            marginWidth = (int)(this.Width / 20);
-            marginHeight = (int)(this.Height / 20);
+            marginWidth = (int)(this.Width / marginEWDevide);
+            marginHeight = (int)(this.Height / marginNSDevide);
             plotArea = new Rectangle(marginWidth, marginHeight, 
                                         this.Width - 2 * marginWidth, this.Height - 2 * marginHeight);
         }
@@ -951,7 +1043,7 @@ namespace AxisBox
         /// <param name="y">y行向量</param>
         public void Plot(Matrix x, Matrix y)
         {
-            isPlotted = true;
+            IsPlotted = true;
             System.Drawing.Drawing2D.DashStyle dashTemp;
             switch (lineDashStyle)
             {
@@ -1044,6 +1136,7 @@ namespace AxisBox
             xTickOnToolStripMenuItem.Enabled = true;
             yTickOnToolStripMenuItem.Enabled = true;
             darkThemeToolStripMenuItem.Enabled = true;
+            settingsToolStripMenuItem.Enabled = true;
             //拟合菜单项设置
             int fitTargetItemsCount=fitTargetToolStripComboBox.Items.Count;
             for (int i = 0; i < fitTargetItemsCount; i++)
@@ -1105,6 +1198,121 @@ namespace AxisBox
             this.ChangeLineStyle(xVal.Count - 1, curveStyle);
         }
         /// <summary>
+        /// 根据极坐标画图
+        /// </summary>
+        /// <param name="pho">半径值</param>
+        /// <param name="theta">转角值</param>
+        public void Polar(Matrix pho, Matrix theta)
+        {
+            Matrix xTempVal = Matrix.Zeros(pho.Rows, pho.Columns);
+            Matrix yTempVal = Matrix.Zeros(pho.Rows, pho.Columns);
+            for (int i = 0; i < xTempVal.Columns; i++)
+            {
+                xTempVal[0, i] = pho[0, i] * Math.Cos(theta[0, i]);
+                yTempVal[0, i] = pho[0, i] * Math.Sin(theta[0, i]);
+            }
+            this.Plot(xTempVal, yTempVal);
+        }
+        /// <summary>
+        /// 使图像旋转指定角度
+        /// </summary>
+        /// <param name="degree">旋转角度(角度制)</param>
+        /// <param name="reverse">是否反向(顺时针)</param>
+        public void Rotate(double degree, bool reverse = false)
+        {
+            if (this.IsPlotted)
+            {
+                List<Matrix> xValueTemp = new List<Matrix>();
+                List<Matrix> yValueTemp = new List<Matrix>();
+                for (int i = 0; i < xVal.Count; i++)
+                {
+                    xValueTemp.Add(new Matrix(xVal[i]));
+                    yValueTemp.Add(new Matrix(yVal[i]));
+                    double[] pointTemp = new double[2];
+                    for (int j = 0; j < xValueTemp[i].Columns; j++)
+                    {
+                        pointTemp = this.getRotatePoint(xValueTemp[i][0, j], yValueTemp[i][0, j], degree, reverse);
+                        xValueTemp[i][0, j] = pointTemp[0];
+                        yValueTemp[i][0, j] = pointTemp[1];
+                    }
+                }
+                List<string> textSaver = new List<string>(floatingText);
+                List<Font> fontSaver = new List<Font>(floatingFont);
+                List<Brush> brushSaver = new List<Brush>(floatingBrush);
+                List<Point> locSaver = new List<Point>();
+                for (int i = 0; i < floatingLocation.Count; i++)
+                {
+                    double[] pointTemp = this.getRotatePoint(floatingLocation[i].X, floatingLocation[i].Y, degree, reverse);
+                    locSaver.Add(new Point((int)pointTemp[0], (int)pointTemp[1]));
+                }
+                bool holdFlag = this.HoldOn;
+                List<Color> lineColorSaver = new List<Color>(this.lineColorList);
+                List<System.Drawing.Drawing2D.DashStyle> lineDashStyleSaver = new List<System.Drawing.Drawing2D.DashStyle>(this.lineDashStyleList);
+                this.RemoveAllFnc();
+                for (int i = 0; i < xValueTemp.Count; i++)
+                {
+                    this.Plot(xValueTemp[i], yValueTemp[i]);
+                    this.HoldOn = true;
+                }
+                this.lineColorList = lineColorSaver;
+                this.lineDashStyleList = lineDashStyleSaver;
+                this.floatingText = textSaver;
+                this.floatingFont = fontSaver;
+                this.floatingBrush = brushSaver;
+                this.floatingLocation = locSaver;
+                this.HoldOn = holdFlag;
+            }
+        }
+        /// <summary>
+        /// 将图像旋转90度
+        /// </summary>
+        /// <param name="reverse">是否反向(顺时针)</param>
+        public void Rotate90(bool reverse = false)
+        {
+            if (this.IsPlotted)
+            {
+                List<Matrix> xValueTemp = new List<Matrix>();
+                List<Matrix> yValueTemp = new List<Matrix>();
+                for (int i = 0; i < xVal.Count; i++)
+                {
+                    xValueTemp.Add(new Matrix(xVal[i]));
+                    yValueTemp.Add(new Matrix(yVal[i]));
+                    double[] pointTemp = new double[2];
+                    for (int j = 0; j < xValueTemp[i].Columns; j++)
+                    {
+                        pointTemp = this.getRotate90Point(xValueTemp[i][0, j], yValueTemp[i][0, j], reverse);
+                        xValueTemp[i][0, j] = pointTemp[0];
+                        yValueTemp[i][0, j] = pointTemp[1];
+                    }
+                }
+                List<string> textSaver = new List<string>(floatingText);
+                List<Font> fontSaver = new List<Font>(floatingFont);
+                List<Brush> brushSaver = new List<Brush>(floatingBrush);
+                List<Point> locSaver = new List<Point>();
+                for (int i = 0; i < floatingLocation.Count; i++)
+                {
+                    double[] pointTemp = this.getRotate90Point(floatingLocation[i].X, floatingLocation[i].Y, reverse);
+                    locSaver.Add(new Point((int)pointTemp[0], (int)pointTemp[1]));
+                }
+                bool holdFlag = this.HoldOn;
+                List<Color> lineColorSaver = new List<Color>(this.lineColorList);
+                List<System.Drawing.Drawing2D.DashStyle> lineDashStyleSaver = new List<System.Drawing.Drawing2D.DashStyle>(this.lineDashStyleList);
+                this.RemoveAllFnc();
+                for (int i = 0; i < xValueTemp.Count; i++)
+                {
+                    this.Plot(xValueTemp[i], yValueTemp[i]);
+                    this.HoldOn = true;
+                }
+                this.lineColorList = lineColorSaver;
+                this.lineDashStyleList = lineDashStyleSaver;
+                this.floatingText = textSaver;
+                this.floatingFont = fontSaver;
+                this.floatingBrush = brushSaver;
+                this.floatingLocation = locSaver;
+                this.HoldOn = holdFlag;
+            }
+        }
+        /// <summary>
         /// 移去所有已画函数
         /// </summary>
         public void RemoveAllFnc()
@@ -1117,7 +1325,7 @@ namespace AxisBox
             yValRepository.RemoveRange(0, yValRepository.Count);
             lineColorList.RemoveRange(0, lineColorList.Count);
             lineDashStyleList.RemoveRange(0, lineDashStyleList.Count);
-            isPlotted = false;
+            IsPlotted = false;
             refit = false;
             refreshParameter();
             #region 使右键菜单相应功能失效
@@ -1143,6 +1351,34 @@ namespace AxisBox
             #endregion
             plotToolStripMenuItem.Enabled = true;
             targetsBeenFitted.RemoveRange(0, targetsBeenFitted.Count);
+            this.RemoveAllFont();
+        }
+        /// <summary>
+        /// 在图形上画浮动字体
+        /// </summary>
+        /// <param name="text">文本内容</param>
+        /// <param name="xCoord">x坐标</param>
+        /// <param name="yCoord">y坐标</param>
+        /// <param name="fontOfText">文本字体</param>
+        /// <param name="textBrush">文本色刷</param>
+        public void AddFloatingString(String text, int xCoord, int yCoord, Font fontOfText, Brush textBrush)
+        {
+            floatingText.Add(text);
+            floatingFont.Add(fontOfText);
+            floatingBrush.Add(textBrush);
+            floatingLocation.Add(new Point(xCoord, yCoord));
+            this.Invalidate();
+        }
+        /// <summary>
+        /// 移除所有浮动文字
+        /// </summary>
+        public void RemoveAllFont()
+        {
+            floatingText.RemoveRange(0, floatingText.Count);
+            floatingFont.RemoveRange(0, floatingFont.Count);
+            floatingBrush.RemoveRange(0, floatingBrush.Count);
+            floatingLocation.RemoveRange(0, floatingLocation.Count);
+            this.Invalidate();
         }
         /// <summary>
         /// 拟合曲线
@@ -1278,6 +1514,25 @@ namespace AxisBox
                 default:
                     lineDashStyle = System.Drawing.Drawing2D.DashStyle.Solid; break;
             } 
+        }
+        /// <summary>
+        /// 保存当前图像
+        /// </summary>
+        /// <returns>保存成功返回true否则为false</returns>
+        public bool SaveFigure()
+        {
+            SaveFileDialog saveFigureDialog = new SaveFileDialog();
+            saveFigureDialog.Filter = "(*.png)|*.png";
+            if (saveFigureDialog.ShowDialog() == DialogResult.OK)
+            {
+                Bitmap bitTemp = new Bitmap(this.Width, this.Height);
+                Graphics g = Graphics.FromImage(bitTemp);
+                g.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+                g.CopyFromScreen(this.PointToScreen(new Point(0, 0)), new Point(0, 0), new Size(this.Width, this.Height));
+                bitTemp.Save(saveFigureDialog.FileName);
+                return true;
+            }
+            return false;
         }
         #endregion
 
@@ -1435,15 +1690,18 @@ namespace AxisBox
                         xMax = max1;
                 }
             }
+            if (xMin == xMax)
+            {
+                xMin = Math.Pow(10, Math.Round(Math.Log10(xMin) - 1, MidpointRounding.AwayFromZero));
+                xMax = Math.Pow(10, Math.Round(Math.Log10(xMax) + 1, MidpointRounding.AwayFromZero));
+                xStep = Math.Pow(10, Math.Round(Math.Log10((xMax - xMin) / 10), MidpointRounding.AwayFromZero));
+                originX = xMin;
+                return;
+            }
             double xMinReal = xMin;
             double xMaxReal = xMax;
             xMin = Math.Pow(10, Math.Floor(Math.Log10(xMin)));
             xMax = Math.Pow(10, Math.Ceiling(Math.Log10(xMax)));
-            if (xMin == xMax)
-            {
-                xMin = Math.Pow(10, Math.Log10(xMin) - 1);
-                xMax = Math.Pow(10, Math.Log10(xMax) + 1);
-            }
             double xRange = xMax - xMin;
             xStep = Math.Pow(10, Math.Round(Math.Log10(xRange / 10), MidpointRounding.AwayFromZero));
             while (xMin <= (xMinReal - xStep))
@@ -1454,15 +1712,17 @@ namespace AxisBox
             {
                 xMax = xMax - xStep;
             }
-            if ((xMax - xMin) / xStep < 4)
+            while ((xMax - xMin) / xStep < 4)
+            {
                 xStep = xStep / 10;
-            while (xMin <= (xMinReal - xStep))
-            {
-                xMin = xMin + xStep;
-            }
-            while (xMax >= (xMaxReal + xStep))
-            {
-                xMax = xMax - xStep;
+                while (xMin <= (xMinReal - xStep))
+                {
+                    xMin = xMin + xStep;
+                }
+                while (xMax >= (xMaxReal + xStep))
+                {
+                    xMax = xMax - xStep;
+                }
             }
             originX = xMin;
         }
@@ -1482,15 +1742,18 @@ namespace AxisBox
                         yMax = max2;
                 }
             }
+            if (yMin == yMax)//说明在画平行于y轴的直线
+            {
+                yMin = Math.Pow(10, Math.Round(Math.Log10(yMin) - 1, MidpointRounding.AwayFromZero));
+                yMax = Math.Pow(10, Math.Round(Math.Log10(yMax) + 1, MidpointRounding.AwayFromZero));
+                yStep = Math.Pow(10, Math.Round(Math.Log10((yMax - yMin) / 10), MidpointRounding.AwayFromZero));
+                originY = yMin;
+                return;
+            }
             double yMinReal = yMin;
             double yMaxReal = yMax;
             yMin = Math.Pow(10, Math.Floor(Math.Log10(yMin)));
             yMax = Math.Pow(10, Math.Ceiling(Math.Log10(yMax)));
-            if (yMin == yMax)//说明在画平行于x轴的直线
-            {
-                yMin = Math.Pow(10, Math.Log10(yMin) - 1);
-                yMax = Math.Pow(10, Math.Log10(yMax) + 1);
-            }
             double yRange = yMax - yMin;
             yStep = Math.Pow(10, Math.Round(Math.Log10(yRange / 10), MidpointRounding.AwayFromZero));
             while (yMin <= (yMinReal - yStep))
@@ -1501,15 +1764,17 @@ namespace AxisBox
             {
                 yMax = yMax - yStep;
             }
-            if ((yMax - yMin) / yStep < 4)
+            while ((yMax - yMin) / yStep < 4)
+            {
                 yStep = yStep / 10;
-            while (yMin <= (yMinReal - yStep))
-            {
-                yMin = yMin + yStep;
-            }
-            while (yMax >= (yMaxReal + yStep))
-            {
-                yMax = yMax - yStep;
+                while (yMin <= (yMinReal - yStep))
+                {
+                    yMin = yMin + yStep;
+                }
+                while (yMax >= (yMaxReal + yStep))
+                {
+                    yMax = yMax - yStep;
+                }
             }
             originY = yMin;
         }
@@ -1529,6 +1794,14 @@ namespace AxisBox
                         xMax = max1;
                 }
             }
+            if (xMin == xMax)//说明在画平行于x轴的直线
+            {
+                xMin = (int)xMin - 2;
+                xMax = (int)xMax + 2;
+                xStep = 1;
+                originX = xMin;
+                return;
+            }
             double xMinReal = xMin;
             double xMaxReal = xMax;
             if (xMin > 0)
@@ -1547,11 +1820,6 @@ namespace AxisBox
             {
                 xMax = -Math.Pow(10, Math.Floor(Math.Log10(-xMax)));
             }
-            if (xMin == xMax)//说明在画平行于y轴的直线
-            {
-                xMin = xMin - 3;
-                xMax = xMax + 3;
-            }
             double xRange = xMax - xMin;
             xStep = Math.Pow(10, Math.Round(Math.Log10(xRange / 10), MidpointRounding.AwayFromZero));
             while (xMin <= (xMinReal - xStep))
@@ -1562,15 +1830,17 @@ namespace AxisBox
             {
                 xMax = xMax - xStep;
             }
-            if ((xMax - xMin) / xStep < 4)
+            while ((xMax - xMin) / xStep < 4)
+            {
                 xStep = xStep / 10;
-            while (xMin <= (xMinReal - xStep))
-            {
-                xMin = xMin + xStep;
-            }
-            while (xMax >= (xMaxReal + xStep))
-            {
-                xMax = xMax - xStep;
+                while (xMin <= (xMinReal - xStep))
+                {
+                    xMin = xMin + xStep;
+                }
+                while (xMax >= (xMaxReal + xStep))
+                {
+                    xMax = xMax - xStep;
+                }
             }
             originX = xMin;
         }
@@ -1590,6 +1860,14 @@ namespace AxisBox
                         yMax = max2;
                 }
             }
+            if (yMin == yMax)//说明在画平行于y轴的直线
+            {
+                yMax = (int)yMax + 2;
+                yMin = (int)yMin - 2;
+                yStep = 1;
+                originY = yMin;
+                return;
+            }
             double yMinReal = yMin;
             double yMaxReal = yMax;
             if (yMin > 0)
@@ -1608,11 +1886,6 @@ namespace AxisBox
             {
                 yMax = -Math.Pow(10, Math.Floor(Math.Log10(-yMax)));
             }
-            if (yMin == yMax)//说明在画平行于x轴的直线
-            {
-                yMax = yMax + 3;
-                yMin = yMin - 3;
-            }
             double yRange = yMax - yMin;
             yStep = Math.Pow(10, Math.Round(Math.Log10(yRange / 10), MidpointRounding.AwayFromZero));
             while (yMin <= (yMinReal - yStep))
@@ -1623,23 +1896,25 @@ namespace AxisBox
             {
                 yMax = yMax - yStep;
             }
-            if ((yMax - yMin) / yStep < 4)
+            while ((yMax - yMin) / yStep < 4)
+            {
                 yStep = yStep / 10;
-            while (yMin <= (yMinReal - yStep))
-            {
-                yMin = yMin + yStep;
-            }
-            while (yMax >= (yMaxReal + yStep))
-            {
-                yMax = yMax - yStep;
+                while (yMin <= (yMinReal - yStep))
+                {
+                    yMin = yMin + yStep;
+                }
+                while (yMax >= (yMaxReal + yStep))
+                {
+                    yMax = yMax - yStep;
+                }
             }
             originY = yMin;
         }
         private void refreshParameter()
         {
             //以下作用为刷新曲线数据点、坐标原点所对应的物理坐标点
-            marginWidth = (int)(this.Width / 20);
-            marginHeight = (int)(this.Height / 20);
+            marginWidth = (int)(this.Width / marginEWDevide);
+            marginHeight = (int)(this.Height / marginNSDevide);
             plotArea = new Rectangle(marginWidth, marginHeight,
                                         this.Width - 2 * marginWidth, this.Height - 2 * marginHeight);
             //移除画图物理坐标并重置
@@ -1696,6 +1971,62 @@ namespace AxisBox
                                         yVal.ElementAt(index)[0, i + 1], yVal.ElementAt(index)[0, i + 2] });
                 yPoint_Temp = Matrix.Transfer(yPoint_Temp);
                 result = Matrix.SetMatrixRow(result, i, Matrix.Transfer(Matrix.FitCurve(xPoint_Temp, yPoint_Temp)));
+            }
+            return result;
+        }
+        private double[] getRotatePoint(double xPrevious, double yPrevious, double degree, bool reverse = false)
+        {
+            double[] result = new double[2];
+            double currentAngle = Math.Atan(Math.Abs(yPrevious / xPrevious));
+            if (xPrevious >= 0 && yPrevious >= 0)//第一象限
+            {
+
+            }
+            else if (xPrevious < 0 && yPrevious >= 0)//第二象限
+            {
+                currentAngle = Math.PI - currentAngle;
+            }
+            else if (xPrevious < 0 && yPrevious < 0)//第三象限
+            {
+                currentAngle = Math.PI + currentAngle;
+            }
+            else//第四象限
+            {
+                currentAngle = Math.PI * 2 - currentAngle;
+            }
+            if (!reverse)
+            {
+                currentAngle = currentAngle + degree * Math.PI / 180;
+            }
+            else
+            {
+                currentAngle = currentAngle - degree * Math.PI / 180;
+            }
+            if (currentAngle > Math.PI * 2)
+            {
+                currentAngle -= Math.PI * 2;
+            }
+            if (currentAngle < 0)
+            {
+                currentAngle += Math.PI * 2;
+            }
+            double distance = Math.Sqrt(xPrevious * xPrevious + yPrevious * yPrevious);
+            result[0] = distance * Math.Cos(currentAngle);
+            result[1] = distance * Math.Sin(currentAngle);
+            return result;
+        }
+        private double[] getRotate90Point(double xPrevious, double yPrevious, bool reverse = false)
+        {
+            double[] result = new double[2];
+            if (!reverse)
+            {
+                result[0] = -yPrevious;
+                result[1] = xPrevious;
+            }
+            else
+            {
+                result[0] = yPrevious;
+                result[1] = -xPrevious;
             }
             return result;
         }
@@ -1943,257 +2274,309 @@ namespace AxisBox
             /// <param name="y">指针处y坐标</param>
             void coordChanged(double x, double y);
         }
+        /// <summary>
+        /// 是否画出图形监听
+        /// </summary>
+        public interface IsPlottedListener
+        {
+            /// <summary>
+            /// 当isPlotted变量发生变化时调用这个函数
+            /// </summary>
+            /// <param name="crvIsPlotted"></param>
+            void curvePlotted(bool crvIsPlotted);
+        }
+        public delegate void PlotStateChangedHandler(bool PlotState);
+        public delegate void PaintBeforeAll(Graphics g, Rectangle plotRect, Rectangle wholeArea);
+        public delegate void PaintAfterAll(Graphics g, Rectangle plotRect, Rectangle wholeArea);
+        public delegate void SizeChangedHook(object sender, EventArgs e);
+        public delegate void MarginEWChanged(Graphics g, Rectangle plotRect, Rectangle wholeArea);
+        public delegate void MarginNSChanged(Graphics g, Rectangle plotRect, Rectangle wholeArea);
         #endregion
 
         private void AxisBox_Paint(object sender, PaintEventArgs e)
         {
-            if (isPlotted)//画函数图的时候
-            {
-                //画背景
-                Graphics g = e.Graphics;
-                SolidBrush backgroundBrush = new SolidBrush(borderColor);
-                g.FillRectangle(backgroundBrush, new Rectangle(0, 0, this.Width, this.Height));
-                backgroundBrush = new SolidBrush(backgroundColor);
-                g.FillRectangle(backgroundBrush, plotArea);
-                Pen boxPen = new Pen(Color.Black, 1);
-                g.DrawRectangle(boxPen, plotArea);
-                #region 画x轴
-                if (xAxis)
-                {
-                    Pen axisPen = new Pen(axisAndLabelColor, 1);
-                    g.DrawLine(axisPen, marginWidth, originPoint.Y, marginWidth + plotArea.Width, originPoint.Y);
-                    if (xTickOn)
-                    {
-                        decimal xTemp = Convert.ToDecimal(originX);//之所以用decimal是为了不产生精度损失
-                        while (true)//画x正方向刻度
-                        {
-                            int physicsXTemp = (int)this.ToPhysicsX(Convert.ToDouble(xTemp));
-                            g.DrawLine(axisPen, physicsXTemp, originPoint.Y - 4, physicsXTemp, originPoint.Y);
-                            if (xTickLabelOn)
-                            {
-                                g.DrawString(Convert.ToString(xTemp), new Font("宋体", 9), new SolidBrush(axisAndLabelColor),
-                                                                    new PointF(physicsXTemp, originPoint.Y + 2));
-                            }
-                            xTemp = xTemp + Convert.ToDecimal(xStep);
-                            if (xTemp > Convert.ToDecimal(xMax))
-                                break;
-                        }
-                        xTemp = Convert.ToDecimal(originX);
-                        while (true)//画x反方向刻度
-                        {
-                            xTemp = xTemp - Convert.ToDecimal(xStep);
-                            if (xTemp < Convert.ToDecimal(xMin))
-                                break;
-                            int physicsXTemp = (int)this.ToPhysicsX(Convert.ToDouble(xTemp));
-                            g.DrawLine(axisPen, physicsXTemp, originPoint.Y - 4, physicsXTemp, originPoint.Y);
-                            if (xTickLabelOn)
-                            {
-                                g.DrawString(Convert.ToString(xTemp), new Font("宋体", 9), new SolidBrush(axisAndLabelColor),
-                                                                    new PointF(physicsXTemp, originPoint.Y + 2)); 
-                            }
-                        } 
-                    }
-                    //画xLabel
-                    if (xLabelOn)
-                    {
-                        SizeF sizeOfXLabel = g.MeasureString(xLabel, new Font("宋体", xLabelSize));
-                        int xLabelWidth = (int)sizeOfXLabel.Width;
-                        int xLabelHeight = (int)sizeOfXLabel.Height;
-                        g.DrawString(xLabel, new Font("宋体", xLabelSize), new SolidBrush(axisAndLabelColor),
-                            new PointF(this.Width - marginWidth - 2 * xLabelWidth, originPoint.Y - xLabelHeight - 4));
-                    }
-                }
-                #endregion
-                #region 画y轴
-                if (yAxis)
-                {
-                    Pen axisPen = new Pen(axisAndLabelColor, 1);
-                    g.DrawLine(axisPen, originPoint.X, marginHeight + plotArea.Height, originPoint.X, marginHeight);
-                    if (yTickOn)
-                    {
-                        decimal yTemp = Convert.ToDecimal(originY);//之所以用decimal是为了不产生精度损失
-                        while (true)//画y正方向刻度
-                        {
-                            int physicsYTemp = (int)this.ToPhysicsY(Convert.ToDouble(yTemp));
-                            g.DrawLine(axisPen, originPoint.X, physicsYTemp, originPoint.X + 4, physicsYTemp);
-                            SizeF sizeOfYTick = g.MeasureString(Convert.ToString(yTemp), new Font("宋体", 9));
-                            int yTickWidth = (int)sizeOfYTick.Width;
-                            if (yTickLabelOn)
-                            {
-                                g.DrawString(Convert.ToString(yTemp), new Font("宋体", 9), new SolidBrush(axisAndLabelColor),
-                                                                    new PointF(originPoint.X - yTickWidth, physicsYTemp)); 
-                            }
-                            yTemp = yTemp + Convert.ToDecimal(yStep);
-                            if (yTemp > Convert.ToDecimal(yMax))
-                                break;
-                        }
-                        yTemp = Convert.ToDecimal(originY);
-                        while (true)//画y反方向刻度
-                        {
-                            yTemp = yTemp - Convert.ToDecimal(yStep);
-                            if (yTemp < Convert.ToDecimal(yMin))
-                                break;
-                            int physicsYTemp = (int)this.ToPhysicsY(Convert.ToDouble(yTemp));
-                            g.DrawLine(axisPen, originPoint.X, physicsYTemp, originPoint.X + 4, physicsYTemp);
-                            SizeF sizeOfYTick = g.MeasureString(Convert.ToString(yTemp), new Font("宋体", 9));
-                            int yTickWidth = (int)sizeOfYTick.Width;
-                            if (yTickLabelOn)
-                            {
-                                g.DrawString(Convert.ToString(yTemp), new Font("宋体", 9), new SolidBrush(axisAndLabelColor),
-                                                                    new PointF(originPoint.X - yTickWidth, physicsYTemp)); 
-                            }
-                        } 
-                    }
-                    if (yLabelOn)
-                    {
-                        SizeF sizeOfYLabel = g.MeasureString(Convert.ToString(yLabel), new Font("宋体", yLabelSize));
-                        int yLabelWidth = (int)sizeOfYLabel.Width;
-                        int yLabelHeight = (int)sizeOfYLabel.Height;
-                        g.DrawString(yLabel, new Font("宋体", yLabelSize), new SolidBrush(axisAndLabelColor),
-                            new PointF(originPoint.X + 4, marginHeight + 3));
-                    }
-                }
-                #endregion
-                #region 画网格
-                if (gridOn)
-                {
-                    Pen gridPen = new Pen(new SolidBrush(axisAndLabelColor));
-                    gridPen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dot;
-                    double xTemp = originX;
-                    double yTemp = originY;
-                    //画平行x轴网线
-                    while (true)
-                    {
-                        xTemp = xTemp + xStep;
-                        if (xTemp > xMax)
-                            break;
-                        int physicsXTemp = (int)ToPhysicsX(xTemp);
-                        g.DrawLine(gridPen, physicsXTemp, marginHeight, physicsXTemp, this.Height - marginHeight);
-                    }
-                    xTemp = originX;
-                    while (true)
-                    {
-                        xTemp = xTemp - xStep;
-                        if (xTemp < xMin)
-                            break;
-                        int physicsXTemp = (int)ToPhysicsX(xTemp);
-                        g.DrawLine(gridPen, physicsXTemp, marginHeight, physicsXTemp, this.Height - marginHeight);
-                    }
-                    //画平行y轴网线
-                    while (true)
-                    {
-                        yTemp = yTemp + yStep;
-                        if (yTemp > yMax)
-                            break;
-                        int physicsYTemp = (int)ToPhysicsY(yTemp);
-                        g.DrawLine(gridPen, marginWidth, physicsYTemp, this.Width - marginWidth, physicsYTemp);
-                    }
-                    yTemp = originY;
-                    while (true)
-                    {
-                        yTemp = yTemp - yStep;
-                        if (yTemp < yMin)
-                            break;
-                        int physicsYTemp = (int)ToPhysicsY(yTemp);
-                        g.DrawLine(gridPen, marginWidth, physicsYTemp, this.Width - marginWidth, physicsYTemp);
-                    }
-                }
-                #endregion
-                #region 画函数
-                if (phisicsX.Count != 0)//有数据点才画函数图
-                {
-                    if (continuousOn)//是否画出连续曲线
-                    {
-                        Pen funcPen;
-                        for (int i = 0; i < phisicsX.Count; i++)
-                        {
-                            funcPen = new Pen(lineColorList.ElementAt(i));
-                            funcPen.DashStyle = lineDashStyleList.ElementAt(i);
-                            for (int j = 0; j < phisicsX.ElementAt(i).Columns - 1; j++)
-                            {
-                                if (xVal.ElementAt(i)[0, j] >= xMin && xVal.ElementAt(i)[0, j + 1] <= xMax &&
-                                    yVal.ElementAt(i)[0, j] >= yMin && yVal.ElementAt(i)[0, j + 1] <= yMax)
-                                {
-                                    g.DrawLine(funcPen, (int)phisicsX.ElementAt(i)[0, j], (int)phisicsY.ElementAt(i)[0, j],
-                                        (int)phisicsX.ElementAt(i)[0, j + 1], (int)phisicsY.ElementAt(i)[0, j + 1]);
-                                }
-                            }
-                        } 
-                    }
-                    if (discreteOn)//是否画出离散点
-                    {
-                        if (!refit)//未重新拟合
-                        {
-                            SolidBrush sampleBrush = new SolidBrush(samplePointColor);
-                            for (int i = 0; i < phisicsX.Count; i++)
-                            {
-                                for (int j = 0; j < phisicsX.ElementAt(i).Columns; j++)
-                                {
-                                    g.FillEllipse(sampleBrush, (int)phisicsX.ElementAt(i)[0, j] - radiusOfSamplePoint,
-                                                    (int)phisicsY.ElementAt(i)[0, j] - radiusOfSamplePoint,
-                                                    2 * radiusOfSamplePoint, 2 * radiusOfSamplePoint);
-                                }
-                            }
-                        }
-                        else//重新拟合过
-                        {
-                            SolidBrush sampleBrush = new SolidBrush(samplePointColor);
-                            for (int i = 0; i < phisicsXRepository.Count; i++)
-                            {
-                                for (int j = 0; j < phisicsXRepository.ElementAt(i).Columns; j++)
-                                {
-                                    g.FillEllipse(sampleBrush, 
-                                                    (int)phisicsXRepository.ElementAt(i)[0, j] - radiusOfSamplePoint,
-                                                    (int)phisicsYRepository.ElementAt(i)[0, j] - radiusOfSamplePoint,
-                                                    2 * radiusOfSamplePoint, 2 * radiusOfSamplePoint);
-                                }
-                            }
-                        }
-                    }
-                }
-                #endregion
-                #region 画标题
-                if (titleOn)
-                {
-                    SizeF sizeOfTitle = g.MeasureString(plotTitle, new Font("宋体", plotTitleSize));
-                    int stringWidth = (int)sizeOfTitle.Width;
-                    int stringHeight = (int)sizeOfTitle.Height;
-                    Pen titlePen = new Pen(Color.Black, 1);
-                    g.DrawString(plotTitle, new Font("宋体", plotTitleSize), new SolidBrush(axisAndLabelColor),
-                                    new PointF((this.Width - stringWidth) / 2, 0));
-                }
-                #endregion
-                #region 画动态捕捉点
-                if (captureMode)//捕捉模式已打开
-                {
-                    if (capture)//捕捉到曲线上点
-                    {
-                        Pen capturePen = new Pen(Color.Red, 1);
-                        g.DrawLine(capturePen, capturePoint.X - 35, capturePoint.Y, capturePoint.X + 35, capturePoint.Y);
-                        g.DrawLine(capturePen, capturePoint.X, capturePoint.Y - 35, capturePoint.X, capturePoint.Y + 35);
-                        g.DrawEllipse(capturePen, capturePoint.X - 4, capturePoint.Y - 4, 8, 8);
-                        string showText="(" + Convert.ToString(capturePointActual.X) + "," +
-                                            Convert.ToString(capturePointActual.Y) + ")";
-                        SizeF sizeOfText = g.MeasureString(showText, new Font("宋体", 9));
-                        int locX=capturePoint.X + 5;
-                        int locY=capturePoint.Y + 5;
-                        if ((locX + sizeOfText.Width) >= this.Width)
-                            locX = locX - (int)sizeOfText.Width - 10;
-                        if ((locY + sizeOfText.Height) >= this.Height)
-                            locY = locY - (int)sizeOfText.Height - 10;
-                        g.DrawString(showText, new Font("宋体", 9),new SolidBrush(Color.Red), new PointF(locX, locY)); 
-                    }
-                }
-                #endregion
-            }
-            else//没有函数可画的情况
-            {
-                Graphics g = e.Graphics;
-                SolidBrush background = new SolidBrush(Color.LightGray);
-                g.FillRectangle(background, new Rectangle(0, 0, this.Width, this.Height));
-                background = new SolidBrush(Color.White);
-                g.FillRectangle(background, plotArea);
-            }
+            //if (IsPlotted)//画函数图的时候
+            //{
+            //    //画背景和画图区
+            //    Graphics g = e.Graphics;
+            //    SolidBrush backgroundBrush = new SolidBrush(borderColor);
+            //    g.FillRectangle(backgroundBrush, new Rectangle(0, 0, this.Width, this.Height));
+            //    backgroundBrush = new SolidBrush(backgroundColor);
+            //    g.FillRectangle(backgroundBrush, plotArea);
+            //    if (boxOn)
+            //    {
+            //        Pen boxPen = new Pen(Color.Black, 1);
+            //        g.DrawRectangle(boxPen, plotArea);
+            //    }
+            //    if (BeforePaint != null)
+            //    {
+            //        BeforePaint(g, plotArea, new Rectangle(0, 0, this.Width, this.Height));
+            //    }
+            //    #region 画x轴
+            //    if (xAxis)
+            //    {
+            //        Pen axisPen = new Pen(axisAndLabelColor, 1);
+            //        g.DrawLine(axisPen, marginWidth, originPoint.Y, marginWidth + plotArea.Width, originPoint.Y);
+            //        if (xTickOn)
+            //        {
+            //            decimal xTemp = Convert.ToDecimal(originX);//之所以用decimal是为了不产生精度损失
+            //            int lastTickEnd = (int)this.ToPhysicsX(Convert.ToDouble(xTemp)) - 1;
+            //            while (true)//画x正方向刻度
+            //            {
+            //                int physicsXTemp = (int)this.ToPhysicsX(Convert.ToDouble(xTemp));
+            //                g.DrawLine(axisPen, physicsXTemp, originPoint.Y - 4, physicsXTemp, originPoint.Y);
+            //                if (xTickLabelOn)
+            //                {
+            //                    if (physicsXTemp > lastTickEnd)
+            //                    {
+            //                        SizeF sizeOfTickLabel = g.MeasureString(Convert.ToString(xTemp), new Font("宋体", 9));
+            //                        g.DrawString(Convert.ToString(xTemp), new Font("宋体", 9), new SolidBrush(axisAndLabelColor),
+            //                                                            new PointF(physicsXTemp, originPoint.Y + 2));
+            //                        lastTickEnd = physicsXTemp + (int)sizeOfTickLabel.Width;
+            //                    }
+            //                }
+            //                xTemp = xTemp + Convert.ToDecimal(xStep);
+            //                if (xTemp > Convert.ToDecimal(xMax))
+            //                    break;
+            //            }
+            //            xTemp = Convert.ToDecimal(originX);
+            //            lastTickEnd = (int)this.ToPhysicsX(Convert.ToDouble(xTemp)) + 1;
+            //            while (true)//画x反方向刻度
+            //            {
+            //                xTemp = xTemp - Convert.ToDecimal(xStep);
+            //                if (xTemp < Convert.ToDecimal(xMin))
+            //                    break;
+            //                int physicsXTemp = (int)this.ToPhysicsX(Convert.ToDouble(xTemp));
+            //                g.DrawLine(axisPen, physicsXTemp, originPoint.Y - 4, physicsXTemp, originPoint.Y);
+            //                if (xTickLabelOn)
+            //                {
+            //                    if (physicsXTemp < lastTickEnd)
+            //                    {
+            //                        SizeF sizeOfTickLabel = g.MeasureString(Convert.ToString(xTemp), new Font("宋体", 9));
+            //                        g.DrawString(Convert.ToString(xTemp), new Font("宋体", 9), new SolidBrush(axisAndLabelColor),
+            //                                                                                    new PointF(physicsXTemp, originPoint.Y + 2));
+            //                        lastTickEnd = physicsXTemp - (int)sizeOfTickLabel.Width;
+            //                    }
+            //                }
+            //            }
+            //        }
+            //        //画xLabel
+            //        if (xLabelOn)
+            //        {
+            //            SizeF sizeOfXLabel = g.MeasureString(xLabel, new Font("宋体", xLabelSize));
+            //            int xLabelWidth = (int)sizeOfXLabel.Width;
+            //            int xLabelHeight = (int)sizeOfXLabel.Height;
+            //            g.DrawString(xLabel, new Font("宋体", xLabelSize), new SolidBrush(axisAndLabelColor),
+            //                new PointF(this.Width - marginWidth - xLabelWidth - 4, originPoint.Y - xLabelHeight - 4));
+            //        }
+            //    }
+            //    #endregion
+            //    #region 画y轴
+            //    if (yAxis)
+            //    {
+            //        Pen axisPen = new Pen(axisAndLabelColor, 1);
+            //        g.DrawLine(axisPen, originPoint.X, marginHeight + plotArea.Height, originPoint.X, marginHeight);
+            //        if (yTickOn)
+            //        {
+            //            decimal yTemp = Convert.ToDecimal(originY);//之所以用decimal是为了不产生精度损失
+            //            int lastTickEnd = (int)this.ToPhysicsY(Convert.ToDouble(yTemp)) + 1;
+            //            while (true)//画y正方向刻度
+            //            {
+            //                int physicsYTemp = (int)this.ToPhysicsY(Convert.ToDouble(yTemp));
+            //                g.DrawLine(axisPen, originPoint.X, physicsYTemp, originPoint.X + 4, physicsYTemp);
+            //                SizeF sizeOfYTick = g.MeasureString(Convert.ToString(yTemp), new Font("宋体", 9));
+            //                int yTickWidth = (int)sizeOfYTick.Width;
+            //                if (yTickLabelOn)
+            //                {
+            //                    if (physicsYTemp < lastTickEnd)
+            //                    {
+            //                        SizeF sizeOfTickLabel = g.MeasureString(Convert.ToString(yTemp), new Font("宋体", 9));
+            //                        g.DrawString(Convert.ToString(yTemp), new Font("宋体", 9), new SolidBrush(axisAndLabelColor),
+            //                                                                                    new PointF(originPoint.X - yTickWidth, physicsYTemp));
+            //                        lastTickEnd = physicsYTemp - (int)sizeOfTickLabel.Height;
+            //                    }
+            //                }
+            //                yTemp = yTemp + Convert.ToDecimal(yStep);
+            //                if (yTemp > Convert.ToDecimal(yMax))
+            //                    break;
+            //            }
+            //            yTemp = Convert.ToDecimal(originY);
+            //            lastTickEnd = (int)this.ToPhysicsY(Convert.ToDouble(yTemp)) - 1;
+            //            while (true)//画y反方向刻度
+            //            {
+            //                yTemp = yTemp - Convert.ToDecimal(yStep);
+            //                if (yTemp < Convert.ToDecimal(yMin))
+            //                    break;
+            //                int physicsYTemp = (int)this.ToPhysicsY(Convert.ToDouble(yTemp));
+            //                g.DrawLine(axisPen, originPoint.X, physicsYTemp, originPoint.X + 4, physicsYTemp);
+            //                SizeF sizeOfYTick = g.MeasureString(Convert.ToString(yTemp), new Font("宋体", 9));
+            //                int yTickWidth = (int)sizeOfYTick.Width;
+            //                if (yTickLabelOn)
+            //                {
+            //                    if (physicsYTemp > lastTickEnd)
+            //                    {
+            //                        SizeF sizeOfTickLabel = g.MeasureString(Convert.ToString(yTemp), new Font("宋体", 9));
+            //                        g.DrawString(Convert.ToString(yTemp), new Font("宋体", 9), new SolidBrush(axisAndLabelColor),
+            //                                                                                    new PointF(originPoint.X - yTickWidth, physicsYTemp));
+            //                        lastTickEnd = physicsYTemp + (int)sizeOfTickLabel.Height;
+            //                    }
+            //                }
+            //            }
+            //        }
+            //        if (yLabelOn)
+            //        {
+            //            SizeF sizeOfYLabel = g.MeasureString(Convert.ToString(yLabel), new Font("宋体", yLabelSize));
+            //            int yLabelWidth = (int)sizeOfYLabel.Width;
+            //            int yLabelHeight = (int)sizeOfYLabel.Height;
+            //            g.DrawString(yLabel, new Font("宋体", yLabelSize), new SolidBrush(axisAndLabelColor),
+            //                new PointF(originPoint.X + 4, marginHeight + 3));
+            //        }
+            //    }
+            //    #endregion
+            //    #region 画网格
+            //    if (gridOn)
+            //    {
+            //        Pen gridPen = new Pen(new SolidBrush(axisAndLabelColor));
+            //        gridPen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dot;
+            //        double xTemp = originX;
+            //        double yTemp = originY;
+            //        //画平行x轴网线
+            //        while (true)
+            //        {
+            //            xTemp = xTemp + xStep;
+            //            if (xTemp > xMax)
+            //                break;
+            //            int physicsXTemp = (int)ToPhysicsX(xTemp);
+            //            g.DrawLine(gridPen, physicsXTemp, marginHeight, physicsXTemp, this.Height - marginHeight);
+            //        }
+            //        xTemp = originX;
+            //        while (true)
+            //        {
+            //            xTemp = xTemp - xStep;
+            //            if (xTemp < xMin)
+            //                break;
+            //            int physicsXTemp = (int)ToPhysicsX(xTemp);
+            //            g.DrawLine(gridPen, physicsXTemp, marginHeight, physicsXTemp, this.Height - marginHeight);
+            //        }
+            //        //画平行y轴网线
+            //        while (true)
+            //        {
+            //            yTemp = yTemp + yStep;
+            //            if (yTemp > yMax)
+            //                break;
+            //            int physicsYTemp = (int)ToPhysicsY(yTemp);
+            //            g.DrawLine(gridPen, marginWidth, physicsYTemp, this.Width - marginWidth, physicsYTemp);
+            //        }
+            //        yTemp = originY;
+            //        while (true)
+            //        {
+            //            yTemp = yTemp - yStep;
+            //            if (yTemp < yMin)
+            //                break;
+            //            int physicsYTemp = (int)ToPhysicsY(yTemp);
+            //            g.DrawLine(gridPen, marginWidth, physicsYTemp, this.Width - marginWidth, physicsYTemp);
+            //        }
+            //    }
+            //    #endregion
+            //    #region 画函数
+            //    if (phisicsX.Count != 0)//有数据点才画函数图
+            //    {
+            //        if (continuousOn)//是否画出连续曲线
+            //        {
+            //            Pen funcPen;
+            //            for (int i = 0; i < phisicsX.Count; i++)
+            //            {
+            //                funcPen = new Pen(lineColorList.ElementAt(i));
+            //                funcPen.DashStyle = lineDashStyleList.ElementAt(i);
+            //                for (int j = 0; j < phisicsX.ElementAt(i).Columns - 1; j++)
+            //                {
+            //                    if (xVal.ElementAt(i)[0, j] >= xMin && xVal.ElementAt(i)[0, j + 1] <= xMax &&
+            //                        yVal.ElementAt(i)[0, j] >= yMin && yVal.ElementAt(i)[0, j + 1] <= yMax)
+            //                    {
+            //                        g.DrawLine(funcPen, (int)phisicsX.ElementAt(i)[0, j], (int)phisicsY.ElementAt(i)[0, j],
+            //                            (int)phisicsX.ElementAt(i)[0, j + 1], (int)phisicsY.ElementAt(i)[0, j + 1]);
+            //                    }
+            //                }
+            //            }
+            //        }
+            //        if (discreteOn)//是否画出离散点
+            //        {
+            //            if (!refit)//未重新拟合
+            //            {
+            //                SolidBrush sampleBrush = new SolidBrush(samplePointColor);
+            //                for (int i = 0; i < phisicsX.Count; i++)
+            //                {
+            //                    for (int j = 0; j < phisicsX.ElementAt(i).Columns; j++)
+            //                    {
+            //                        g.FillEllipse(sampleBrush, (int)phisicsX.ElementAt(i)[0, j] - radiusOfSamplePoint,
+            //                                        (int)phisicsY.ElementAt(i)[0, j] - radiusOfSamplePoint,
+            //                                        2 * radiusOfSamplePoint, 2 * radiusOfSamplePoint);
+            //                    }
+            //                }
+            //            }
+            //            else//重新拟合过
+            //            {
+            //                SolidBrush sampleBrush = new SolidBrush(samplePointColor);
+            //                for (int i = 0; i < phisicsXRepository.Count; i++)
+            //                {
+            //                    for (int j = 0; j < phisicsXRepository.ElementAt(i).Columns; j++)
+            //                    {
+            //                        g.FillEllipse(sampleBrush,
+            //                                        (int)phisicsXRepository.ElementAt(i)[0, j] - radiusOfSamplePoint,
+            //                                        (int)phisicsYRepository.ElementAt(i)[0, j] - radiusOfSamplePoint,
+            //                                        2 * radiusOfSamplePoint, 2 * radiusOfSamplePoint);
+            //                    }
+            //                }
+            //            }
+            //        }
+            //    }
+            //    #endregion
+            //    #region 画标题
+            //    if (titleOn)
+            //    {
+            //        SizeF sizeOfTitle = g.MeasureString(plotTitle, new Font("宋体", plotTitleSize));
+            //        int stringWidth = (int)sizeOfTitle.Width;
+            //        int stringHeight = (int)sizeOfTitle.Height;
+            //        Pen titlePen = new Pen(Color.Black, 1);
+            //        g.DrawString(plotTitle, new Font("宋体", plotTitleSize), new SolidBrush(axisAndLabelColor),
+            //                        new PointF((this.Width - stringWidth) / 2, 0));
+            //    }
+            //    #endregion
+            //    #region 画动态捕捉点
+            //    if (captureMode)//捕捉模式已打开
+            //    {
+            //        if (capture)//捕捉到曲线上点
+            //        {
+            //            Pen capturePen = new Pen(Color.Red, 1);
+            //            g.DrawLine(capturePen, capturePoint.X - 35, capturePoint.Y, capturePoint.X + 35, capturePoint.Y);
+            //            g.DrawLine(capturePen, capturePoint.X, capturePoint.Y - 35, capturePoint.X, capturePoint.Y + 35);
+            //            g.DrawEllipse(capturePen, capturePoint.X - 4, capturePoint.Y - 4, 8, 8);
+            //            string showText = "(" + Convert.ToString(capturePointActual.X) + "," +
+            //                                Convert.ToString(capturePointActual.Y) + ")";
+            //            SizeF sizeOfText = g.MeasureString(showText, new Font("宋体", 9));
+            //            int locX = capturePoint.X + 5;
+            //            int locY = capturePoint.Y + 5;
+            //            if ((locX + sizeOfText.Width) >= this.Width)
+            //                locX = locX - (int)sizeOfText.Width - 10;
+            //            if ((locY + sizeOfText.Height) >= this.Height)
+            //                locY = locY - (int)sizeOfText.Height - 10;
+            //            g.DrawString(showText, new Font("宋体", 9), new SolidBrush(Color.Red), new PointF(locX, locY));
+            //        }
+            //    }
+            //    #endregion
+            //    if (AfterPaint != null)
+            //    {
+            //        AfterPaint(g, plotArea, new Rectangle(0, 0, this.Width, this.Height));
+            //    }
+            //}
+            //else//没有函数可画的情况
+            //{
+            //    Graphics g = e.Graphics;
+            //    SolidBrush background = new SolidBrush(borderColor);
+            //    g.FillRectangle(background, new Rectangle(0, 0, this.Width, this.Height));
+            //    background = new SolidBrush(backgroundColor);
+            //    g.FillRectangle(background, plotArea);
+            //}
         }
 
         private void AxisBox_MouseMove(object sender, MouseEventArgs e)//鼠标移动可以自动捕捉坐标点
@@ -2272,6 +2655,333 @@ namespace AxisBox
                 AxisEqual = true;
             }
             refreshParameter();
+            if (SizeChaned_EventHook != null)
+            {
+                SizeChaned_EventHook(sender, e);
+            }
         }
+
+        //为保证不闪烁,增加双缓存机制
+        #region 重绘
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            base.OnPaint(e);
+            Bitmap bufferImage = new Bitmap(this.Width, this.Height);
+            Graphics g = Graphics.FromImage(bufferImage);
+            g.Clear(this.BackColor);
+            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality; //高质量
+            g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;//高像素偏移质量
+
+            if (IsPlotted)//画函数图的时候
+            {
+                //画背景和画图区
+                //Graphics g = e.Graphics;
+                SolidBrush backgroundBrush = new SolidBrush(borderColor);
+                g.FillRectangle(backgroundBrush, new Rectangle(0, 0, this.Width, this.Height));
+                backgroundBrush = new SolidBrush(backgroundColor);
+                g.FillRectangle(backgroundBrush, plotArea);
+                if (boxOn)
+                {
+                    Pen boxPen = new Pen(Color.Black, 1);
+                    g.DrawRectangle(boxPen, plotArea);
+                }
+                if (BeforePaint != null)
+                {
+                    BeforePaint(g, plotArea, new Rectangle(0, 0, this.Width, this.Height));
+                }
+                #region 画x轴
+                if (xAxis)
+                {
+                    Pen axisPen = new Pen(axisAndLabelColor, 1);
+                    //g.DrawLine(axisPen, marginWidth, originPoint.Y, marginWidth + plotArea.Width, originPoint.Y);
+                    g.DrawLine(axisPen, marginWidth, (int)ToPhysicsY(yMin), marginWidth + plotArea.Width, (int)ToPhysicsY(yMin));
+                    if (xTickOn)
+                    {
+                        decimal xTemp = Convert.ToDecimal(originX);//之所以用decimal是为了不产生精度损失
+                        int lastTickEnd = (int)this.ToPhysicsX(Convert.ToDouble(xTemp)) - 1;
+                        while (true)//画x正方向刻度
+                        {
+                            int physicsXTemp = (int)this.ToPhysicsX(Convert.ToDouble(xTemp));
+                            //g.DrawLine(axisPen, physicsXTemp, originPoint.Y - 4, physicsXTemp, originPoint.Y);
+                            g.DrawLine(axisPen, physicsXTemp, (int)ToPhysicsY(yMin) - 4, physicsXTemp, (int)ToPhysicsY(yMin));
+                            if (xTickLabelOn)
+                            {
+                                if (physicsXTemp > lastTickEnd)
+                                {
+                                    SizeF sizeOfTickLabel = g.MeasureString(Convert.ToString(xTemp), new Font("宋体", 9));
+                                    //g.DrawString(Convert.ToString(xTemp), new Font("宋体", 9), new SolidBrush(axisAndLabelColor),
+                                    //                                    new PointF(physicsXTemp, originPoint.Y + 2));
+                                    g.DrawString(Convert.ToString(xTemp), new Font("宋体", 9), new SolidBrush(axisAndLabelColor),
+                                                                        new PointF(physicsXTemp, (int)ToPhysicsY(yMin) + 2));
+                                    lastTickEnd = physicsXTemp + (int)sizeOfTickLabel.Width;
+                                }
+                            }
+                            xTemp = xTemp + Convert.ToDecimal(xStep);
+                            if (xTemp > Convert.ToDecimal(xMax))
+                                break;
+                        }
+                        xTemp = Convert.ToDecimal(originX);
+                        lastTickEnd = (int)this.ToPhysicsX(Convert.ToDouble(xTemp)) + 1;
+                        while (true)//画x反方向刻度
+                        {
+                            xTemp = xTemp - Convert.ToDecimal(xStep);
+                            if (xTemp < Convert.ToDecimal(xMin))
+                                break;
+                            int physicsXTemp = (int)this.ToPhysicsX(Convert.ToDouble(xTemp));
+                            //g.DrawLine(axisPen, physicsXTemp, originPoint.Y - 4, physicsXTemp, originPoint.Y);
+                            g.DrawLine(axisPen, physicsXTemp, (int)ToPhysicsY(yMin) - 4, physicsXTemp, (int)ToPhysicsY(yMin));
+                            if (xTickLabelOn)
+                            {
+                                if (physicsXTemp < lastTickEnd)
+                                {
+                                    SizeF sizeOfTickLabel = g.MeasureString(Convert.ToString(xTemp), new Font("宋体", 9));
+                                    //g.DrawString(Convert.ToString(xTemp), new Font("宋体", 9), new SolidBrush(axisAndLabelColor),
+                                    //                                                            new PointF(physicsXTemp, originPoint.Y + 2));
+                                    g.DrawString(Convert.ToString(xTemp), new Font("宋体", 9), new SolidBrush(axisAndLabelColor),
+                                                                                                new PointF(physicsXTemp, (int)ToPhysicsY(yMin) + 2));
+                                    lastTickEnd = physicsXTemp - (int)sizeOfTickLabel.Width;
+                                }
+                            }
+                        }
+                    }
+                    //画xLabel
+                    if (xLabelOn)
+                    {
+                        SizeF sizeOfXLabel = g.MeasureString(xLabel, new Font("宋体", xLabelSize));
+                        int xLabelWidth = (int)sizeOfXLabel.Width;
+                        int xLabelHeight = (int)sizeOfXLabel.Height;
+                        //g.DrawString(xLabel, new Font("宋体", xLabelSize), new SolidBrush(axisAndLabelColor),
+                        //    new PointF(this.Width - marginWidth - xLabelWidth - 4, originPoint.Y - xLabelHeight - 4));
+                        g.DrawString(xLabel, new Font("宋体", xLabelSize), new SolidBrush(axisAndLabelColor),
+                            new PointF(this.Width - marginWidth - xLabelWidth - 4, (int)ToPhysicsY(yMin) - xLabelHeight - 4));
+                    }
+                }
+                #endregion
+                #region 画y轴
+                if (yAxis)
+                {
+                    Pen axisPen = new Pen(axisAndLabelColor, 1);
+                    //g.DrawLine(axisPen, originPoint.X, marginHeight + plotArea.Height, originPoint.X, marginHeight);
+                    g.DrawLine(axisPen, (int)ToPhysicsX(xMin), marginHeight + plotArea.Height, (int)ToPhysicsX(xMin), marginHeight);
+                    if (yTickOn)
+                    {
+                        decimal yTemp = Convert.ToDecimal(originY);//之所以用decimal是为了不产生精度损失
+                        int lastTickEnd = (int)this.ToPhysicsY(Convert.ToDouble(yTemp)) + 1;
+                        while (true)//画y正方向刻度
+                        {
+                            int physicsYTemp = (int)this.ToPhysicsY(Convert.ToDouble(yTemp));
+                            //g.DrawLine(axisPen, originPoint.X, physicsYTemp, originPoint.X + 4, physicsYTemp);
+                            g.DrawLine(axisPen, (int)ToPhysicsX(xMin), physicsYTemp, (int)ToPhysicsX(xMin) + 4, physicsYTemp);
+                            SizeF sizeOfYTick = g.MeasureString(Convert.ToString(yTemp), new Font("宋体", 9));
+                            int yTickWidth = (int)sizeOfYTick.Width;
+                            if (yTickLabelOn)
+                            {
+                                if (physicsYTemp < lastTickEnd)
+                                {
+                                    SizeF sizeOfTickLabel = g.MeasureString(Convert.ToString(yTemp), new Font("宋体", 9));
+                                    //g.DrawString(Convert.ToString(yTemp), new Font("宋体", 9), new SolidBrush(axisAndLabelColor),
+                                    //                                                            new PointF(originPoint.X - yTickWidth, physicsYTemp));
+                                    g.DrawString(Convert.ToString(yTemp), new Font("宋体", 9), new SolidBrush(axisAndLabelColor),
+                                                                                                new PointF((int)ToPhysicsX(xMin) - yTickWidth, physicsYTemp));
+                                    lastTickEnd = physicsYTemp - (int)sizeOfTickLabel.Height;
+                                }
+                            }
+                            yTemp = yTemp + Convert.ToDecimal(yStep);
+                            if (yTemp > Convert.ToDecimal(yMax))
+                                break;
+                        }
+                        yTemp = Convert.ToDecimal(originY);
+                        lastTickEnd = (int)this.ToPhysicsY(Convert.ToDouble(yTemp)) - 1;
+                        while (true)//画y反方向刻度
+                        {
+                            yTemp = yTemp - Convert.ToDecimal(yStep);
+                            if (yTemp < Convert.ToDecimal(yMin))
+                                break;
+                            int physicsYTemp = (int)this.ToPhysicsY(Convert.ToDouble(yTemp));
+                            //g.DrawLine(axisPen, originPoint.X, physicsYTemp, originPoint.X + 4, physicsYTemp);
+                            g.DrawLine(axisPen, (int)ToPhysicsX(xMin), physicsYTemp, (int)ToPhysicsX(xMin) + 4, physicsYTemp);
+                            SizeF sizeOfYTick = g.MeasureString(Convert.ToString(yTemp), new Font("宋体", 9));
+                            int yTickWidth = (int)sizeOfYTick.Width;
+                            if (yTickLabelOn)
+                            {
+                                if (physicsYTemp > lastTickEnd)
+                                {
+                                    SizeF sizeOfTickLabel = g.MeasureString(Convert.ToString(yTemp), new Font("宋体", 9));
+                                    //g.DrawString(Convert.ToString(yTemp), new Font("宋体", 9), new SolidBrush(axisAndLabelColor),
+                                    //                                                            new PointF(originPoint.X - yTickWidth, physicsYTemp));
+                                    g.DrawString(Convert.ToString(yTemp), new Font("宋体", 9), new SolidBrush(axisAndLabelColor),
+                                                                                                new PointF((int)ToPhysicsX(xMin) - yTickWidth, physicsYTemp));
+                                    lastTickEnd = physicsYTemp + (int)sizeOfTickLabel.Height;
+                                }
+                            }
+                        }
+                    }
+                    if (yLabelOn)
+                    {
+                        SizeF sizeOfYLabel = g.MeasureString(Convert.ToString(yLabel), new Font("宋体", yLabelSize));
+                        int yLabelWidth = (int)sizeOfYLabel.Width;
+                        int yLabelHeight = (int)sizeOfYLabel.Height;
+                        //g.DrawString(yLabel, new Font("宋体", yLabelSize), new SolidBrush(axisAndLabelColor),
+                        //    new PointF(originPoint.X + 4, marginHeight + 3));
+                        g.DrawString(yLabel, new Font("宋体", yLabelSize), new SolidBrush(axisAndLabelColor),
+                            new PointF((int)ToPhysicsX(xMin) + 4, marginHeight + 3));
+                    }
+                }
+                #endregion
+                #region 画网格
+                if (gridOn)
+                {
+                    Pen gridPen = new Pen(new SolidBrush(axisAndLabelColor));
+                    gridPen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dot;
+                    double xTemp = originX;
+                    double yTemp = originY;
+                    //画平行y轴网线
+                    while (true)
+                    {
+                        xTemp = xTemp + xStep;
+                        if (xTemp > xMax)
+                            break;
+                        int physicsXTemp = (int)ToPhysicsX(xTemp);
+                        g.DrawLine(gridPen, physicsXTemp, marginHeight, physicsXTemp, this.Height - marginHeight);
+                    }
+                    xTemp = originX;
+                    while (true)
+                    {
+                        xTemp = xTemp - xStep;
+                        if (xTemp < xMin)
+                            break;
+                        int physicsXTemp = (int)ToPhysicsX(xTemp);
+                        g.DrawLine(gridPen, physicsXTemp, marginHeight, physicsXTemp, this.Height - marginHeight);
+                    }
+                    //画平行x轴网线
+                    while (true)
+                    {
+                        yTemp = yTemp + yStep;
+                        if (yTemp > yMax)
+                            break;
+                        int physicsYTemp = (int)ToPhysicsY(yTemp);
+                        g.DrawLine(gridPen, marginWidth, physicsYTemp, this.Width - marginWidth, physicsYTemp);
+                    }
+                    yTemp = originY;
+                    while (true)
+                    {
+                        yTemp = yTemp - yStep;
+                        if (yTemp < yMin)
+                            break;
+                        int physicsYTemp = (int)ToPhysicsY(yTemp);
+                        g.DrawLine(gridPen, marginWidth, physicsYTemp, this.Width - marginWidth, physicsYTemp);
+                    }
+                }
+                #endregion
+                #region 画函数
+                if (phisicsX.Count != 0)//有数据点才画函数图
+                {
+                    if (continuousOn)//是否画出连续曲线
+                    {
+                        Pen funcPen;
+                        for (int i = 0; i < phisicsX.Count; i++)
+                        {
+                            funcPen = new Pen(lineColorList.ElementAt(i));
+                            funcPen.DashStyle = lineDashStyleList.ElementAt(i);
+                            for (int j = 0; j < phisicsX.ElementAt(i).Columns - 1; j++)
+                            {
+                                if (xVal.ElementAt(i)[0, j] >= xMin && xVal.ElementAt(i)[0, j + 1] <= xMax &&
+                                    yVal.ElementAt(i)[0, j] >= yMin && yVal.ElementAt(i)[0, j + 1] <= yMax)
+                                {
+                                    g.DrawLine(funcPen, (int)phisicsX.ElementAt(i)[0, j], (int)phisicsY.ElementAt(i)[0, j],
+                                        (int)phisicsX.ElementAt(i)[0, j + 1], (int)phisicsY.ElementAt(i)[0, j + 1]);
+                                }
+                            }
+                        }
+                    }
+                    if (discreteOn)//是否画出离散点
+                    {
+                        if (!refit)//未重新拟合
+                        {
+                            SolidBrush sampleBrush = new SolidBrush(samplePointColor);
+                            for (int i = 0; i < phisicsX.Count; i++)
+                            {
+                                for (int j = 0; j < phisicsX.ElementAt(i).Columns; j++)
+                                {
+                                    g.FillEllipse(sampleBrush, (int)phisicsX.ElementAt(i)[0, j] - radiusOfSamplePoint,
+                                                    (int)phisicsY.ElementAt(i)[0, j] - radiusOfSamplePoint,
+                                                    2 * radiusOfSamplePoint, 2 * radiusOfSamplePoint);
+                                }
+                            }
+                        }
+                        else//重新拟合过
+                        {
+                            SolidBrush sampleBrush = new SolidBrush(samplePointColor);
+                            for (int i = 0; i < phisicsXRepository.Count; i++)
+                            {
+                                for (int j = 0; j < phisicsXRepository.ElementAt(i).Columns; j++)
+                                {
+                                    g.FillEllipse(sampleBrush,
+                                                    (int)phisicsXRepository.ElementAt(i)[0, j] - radiusOfSamplePoint,
+                                                    (int)phisicsYRepository.ElementAt(i)[0, j] - radiusOfSamplePoint,
+                                                    2 * radiusOfSamplePoint, 2 * radiusOfSamplePoint);
+                                }
+                            }
+                        }
+                    }
+                }
+                #endregion
+                #region 画标题
+                if (titleOn)
+                {
+                    SizeF sizeOfTitle = g.MeasureString(plotTitle, new Font("宋体", plotTitleSize));
+                    int stringWidth = (int)sizeOfTitle.Width;
+                    int stringHeight = (int)sizeOfTitle.Height;
+                    Pen titlePen = new Pen(Color.Black, 1);
+                    g.DrawString(plotTitle, new Font("宋体", plotTitleSize), new SolidBrush(axisAndLabelColor),
+                                    new PointF((this.Width - stringWidth) / 2, 0));
+                }
+                #endregion
+                #region 画动态捕捉点
+                if (captureMode)//捕捉模式已打开
+                {
+                    if (capture)//捕捉到曲线上点
+                    {
+                        Pen capturePen = new Pen(Color.Red, 1);
+                        g.DrawLine(capturePen, capturePoint.X - 35, capturePoint.Y, capturePoint.X + 35, capturePoint.Y);
+                        g.DrawLine(capturePen, capturePoint.X, capturePoint.Y - 35, capturePoint.X, capturePoint.Y + 35);
+                        g.DrawEllipse(capturePen, capturePoint.X - 4, capturePoint.Y - 4, 8, 8);
+                        string showText = "(" + Convert.ToString(capturePointActual.X) + "," +
+                                            Convert.ToString(capturePointActual.Y) + ")";
+                        SizeF sizeOfText = g.MeasureString(showText, new Font("宋体", 9));
+                        int locX = capturePoint.X + 5;
+                        int locY = capturePoint.Y + 5;
+                        if ((locX + sizeOfText.Width) >= this.Width)
+                            locX = locX - (int)sizeOfText.Width - 10;
+                        if ((locY + sizeOfText.Height) >= this.Height)
+                            locY = locY - (int)sizeOfText.Height - 10;
+                        g.DrawString(showText, new Font("宋体", 9), new SolidBrush(Color.Red), new PointF(locX, locY));
+                    }
+                }
+                #endregion
+                #region 画浮动文字
+                for (int i = 0; i < floatingText.Count; i++)
+                {
+                    g.DrawString(floatingText[i], floatingFont[i], floatingBrush[i],
+                        new Point((int)ToPhysicsX(floatingLocation[i].X), (int)ToPhysicsY(floatingLocation[i].Y)));
+                }
+                #endregion
+                if (AfterPaint != null)
+                {
+                    AfterPaint(g, plotArea, new Rectangle(0, 0, this.Width, this.Height));
+                }
+            }
+            else//没有函数可画的情况
+            {
+                //Graphics g = e.Graphics;
+                SolidBrush background = new SolidBrush(borderColor);
+                g.FillRectangle(background, new Rectangle(0, 0, this.Width, this.Height));
+                background = new SolidBrush(backgroundColor);
+                g.FillRectangle(background, plotArea);
+            }
+
+            e.Graphics.DrawImage(bufferImage, 0, 0);
+        }
+        #endregion
     }
 }
